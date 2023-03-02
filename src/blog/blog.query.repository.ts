@@ -59,6 +59,7 @@ export class BlogQueryRepository {
       name: blogDocument.name,
       description: blogDocument.description,
       websiteUrl: blogDocument.websiteUrl,
+      isMembership: blogDocument.isMembership,
       createdAt: blogDocument.createdAt,
     };
   }
@@ -79,6 +80,7 @@ export class BlogQueryRepository {
         name: item.name,
         description: item.description,
         websiteUrl: item.websiteUrl,
+        isMembership: item.isMembership,
         createdAt: item.createdAt,
       })),
     };

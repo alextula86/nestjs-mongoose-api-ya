@@ -36,8 +36,8 @@ export class PostService {
       title,
       shortDescription,
       content,
-      blogId: 'foundBlog.id',
-      blogName: 'foundBlog.name',
+      blogId: foundBlog.id,
+      blogName: foundBlog.name,
     });
     // Сохраняем пост в базе
     const createdPost = await this.postRepository.save(madePost);
@@ -89,8 +89,8 @@ export class PostService {
       title,
       shortDescription,
       content,
-      blogId: 'foundPost.id',
-      blogName: 'foundPost.title',
+      blogId: foundPost.id,
+      blogName: foundPost.title,
     });
     // Сохраняем пост в базу
     await this.postRepository.save(foundPost);
