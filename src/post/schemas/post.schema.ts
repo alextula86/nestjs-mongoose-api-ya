@@ -193,18 +193,10 @@ export class Post extends Document {
     this.blogName = blogName;
   }
 
-  updateAllPost({
-    title,
-    shortDescription,
-    content,
-    blogId,
-    blogName,
-  }: UpdatePostDto) {
+  updateAllPost({ title, shortDescription, content }: UpdatePostDto) {
     this.setTitle(title);
     this.setShortDescription(shortDescription);
     this.setContent(content);
-    this.setBlogId(blogId);
-    this.setBlogName(blogName);
   }
 
   static make(
