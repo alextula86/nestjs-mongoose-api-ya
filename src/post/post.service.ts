@@ -27,7 +27,7 @@ export class PostService {
     if (isEmpty(foundBlog)) {
       return {
         postId: null,
-        statusCode: HttpStatus.BAD_REQUEST,
+        statusCode: HttpStatus.NOT_FOUND,
         statusMessage: `Blog with id ${blogId} was not found`,
       };
     }
