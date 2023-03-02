@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { BlogRepository } from 'src/blog/blog.repository';
+import { BlogRepository } from '../blog/blog.repository';
 import { PostRepository } from './post.repository';
 import { CreatePostModel, UpdatePostModel } from './types';
 

@@ -1,8 +1,8 @@
 {
   "name": "nestjs-mongoose-api-ya",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "nestjs api",
+  "author": "alextula26",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

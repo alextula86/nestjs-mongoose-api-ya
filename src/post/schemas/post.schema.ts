@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { trim } from 'lodash';
 import { Document, HydratedDocument, Model } from 'mongoose';
-import { LikeStatuses } from 'src/types';
+import { LikeStatuses } from '../../types';
 import { PostDto, LikeStatusPostDto, NewestLikesDto } from '../dto';
 import { CreatePostDto, UpdatePostDto, PostStaticsType } from '../types';
 /*import {
