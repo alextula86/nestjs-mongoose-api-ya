@@ -21,7 +21,7 @@ export class UserQueryRepository {
 
     const query: any = [];
     const sort: any = {
-      [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1,
+      [`accountData.${sortBy}`]: sortDirection === SortDirection.ASC ? 1 : -1,
     };
 
     if (searchLoginTerm) {
