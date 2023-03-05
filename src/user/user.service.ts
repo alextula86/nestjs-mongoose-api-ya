@@ -1,27 +1,23 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { CreateUserModel } from './types';
-import { bcryptService } from '../application';
+import { validateOrRejectModel } from '../validate';
+import { CreateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
-  async createUser({ login, email, password }: CreateUserModel): Promise<{
+  async createUser(createUserDto: CreateUserDto): Promise<{
     userId: string;
     statusCode: HttpStatus;
     statusMessage: string;
   }> {
-    // Генерируем соль
-    const passwordSalt = bcryptService.generateSaltSync(10);
-    // Генерируем хэш пароля
-    const passwordHash = await bcryptService.generateHash(
-      password,
-      passwordSalt,
-    );
+    await validateOrRejectModel(createUserDto, CreateUserDto);
+
+    const { login, password, email } = createUserDto;
     // Создаем документ пользователя
     const madeUser = await this.userRepository.createUser({
       login,
-      passwordHash,
+      password,
       email,
     });
     // Сохраняем пользователя в базе

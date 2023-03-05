@@ -11,22 +11,15 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  QueryBlogModel,
-  CreateBlogModel,
-  UpdateBlogModel,
-  BlogViewModel,
-} from './types';
 import { BlogService } from './blog.service';
 import { PostService } from '../post/post.service';
 import { BlogQueryRepository } from './blog.query.repository';
 import { PostQueryRepository } from '../post/post.query.repository';
+import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
+import { BlogIdDto, CreatePostBaseDto } from '../post/dto/post.dto';
+import { QueryBlogModel, BlogViewModel } from './types';
+import { PostViewModel, QueryPostModel } from '../post/types';
 import { ResponseViewModelDetail } from '../types';
-import {
-  CreatePostForBlogModel,
-  PostViewModel,
-  QueryPostModel,
-} from '../post/types';
 
 @Controller('api/blogs')
 export class BlogController {
@@ -77,16 +70,11 @@ export class BlogController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
-    @Body()
-    { name, description, websiteUrl }: CreateBlogModel,
+    @Body() createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModel> {
     // Создаем блогера
     const { blogId, statusCode, statusMessage } =
-      await this.blogService.createBlog({
-        name,
-        description,
-        websiteUrl,
-      });
+      await this.blogService.createBlog(createBlogDto);
     // Если при создании блогера возникли ошибки возращаем статус ошибки
     if (statusCode !== HttpStatus.CREATED) {
       throw new HttpException(statusMessage, statusCode);
@@ -101,16 +89,12 @@ export class BlogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Param('blogId') blogId: string,
-    @Body() { name, description, websiteUrl }: UpdateBlogModel,
+    @Body() updateBlogDto: UpdateBlogDto,
   ): Promise<boolean> {
     // Обновляем блогера
     const { statusCode, statusMessage } = await this.blogService.updateBlog(
       blogId,
-      {
-        name,
-        description,
-        websiteUrl,
-      },
+      updateBlogDto,
     );
     // Если при обновлении блогера возникли ошибки возращаем статус ошибки
     if (statusCode !== HttpStatus.NO_CONTENT) {
@@ -167,23 +151,16 @@ export class BlogController {
 
     return postsByBlogId;
   }
-
   // Создание поста по идентификатору блогера
   @Post(':blogId/posts')
   @HttpCode(HttpStatus.CREATED)
-  async createPost(
-    @Param('blogId') blogId: string,
-    @Body()
-    { title, shortDescription, content }: CreatePostForBlogModel,
+  async createPostsByBlogId(
+    @Param() { blogId }: BlogIdDto,
+    @Body() createPostBaseDto: CreatePostBaseDto,
   ): Promise<PostViewModel> {
     // Создаем пост
     const { postId, statusCode, statusMessage } =
-      await this.postService.createPost({
-        title,
-        shortDescription,
-        content,
-        blogId,
-      });
+      await this.postService.createPostsByBlogId(blogId, createPostBaseDto);
     // Если при создании поста возникли ошибки возращаем статус ошибки
     if (statusCode !== HttpStatus.CREATED) {
       throw new HttpException(statusMessage, statusCode);

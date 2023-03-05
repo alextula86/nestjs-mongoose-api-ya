@@ -2,12 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { trim } from 'lodash';
 import { Document, HydratedDocument, Model } from 'mongoose';
 import { LikeStatuses } from '../../types';
-import { PostDto, LikeStatusPostDto, NewestLikesDto } from '../dto';
-import { CreatePostDto, UpdatePostDto, PostStaticsType } from '../types';
-/*import {
-  LikeStatusPostSchema,
-  NewestLikesSchema,
-} from '../schemas';*/
+import { PostEntity, LikeStatusPostEntity, NewestLikesEntity } from '../entity';
+import { PostStaticsType, MakePostModel, UpdatePostModel } from '../types';
 
 @Schema()
 export class LikeStatusPost {
@@ -163,10 +159,10 @@ export class Post extends Document {
   dislikesCount: number;
 
   @Prop({ type: [LikeStatusPostSchema], default: [] })
-  likes: LikeStatusPostDto[];
+  likes: LikeStatusPostEntity[];
 
   @Prop({ type: [NewestLikesSchema], default: [] })
-  newestLikes: NewestLikesDto[];
+  newestLikes: NewestLikesEntity[];
 
   setTitle(title: string) {
     if (!trim(title)) throw new Error('Bad title value!');
@@ -193,20 +189,20 @@ export class Post extends Document {
     this.blogName = blogName;
   }
 
-  updateAllPost({ title, shortDescription, content }: UpdatePostDto) {
+  updateAllPost({ title, shortDescription, content }: UpdatePostModel) {
     this.setTitle(title);
     this.setShortDescription(shortDescription);
     this.setContent(content);
   }
 
   static make(
-    { title, shortDescription, content, blogId, blogName }: CreatePostDto,
+    { title, shortDescription, content, blogId, blogName }: MakePostModel,
     PostModel: PostModelType,
   ): PostDocument {
     const postTitle = trim(String(title));
     const postShortDescription = trim(String(shortDescription));
     const postContent = trim(String(content));
-    const post = new PostDto(
+    const post = new PostEntity(
       postTitle,
       postShortDescription,
       postContent,

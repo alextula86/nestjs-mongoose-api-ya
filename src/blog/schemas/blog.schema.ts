@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { trim } from 'lodash';
 import { HydratedDocument, Model } from 'mongoose';
-import { BlogDto } from '../dto/blog.dto';
-import { CreateBlogDto, UpdateBlogDto, BlogStaticsType } from '../types';
+import { BlogEntity } from '../entity';
+import { BlogStaticsType, MakeBlogModel, UpdateBlogModel } from '../types';
 
 @Schema()
 export class Blog {
@@ -67,20 +67,20 @@ export class Blog {
     this.websiteUrl = websiteUrl;
   }
 
-  updateAllBlog({ name, description, websiteUrl }: UpdateBlogDto) {
+  updateAllBlog({ name, description, websiteUrl }: UpdateBlogModel) {
     this.setName(name);
     this.setDescription(description);
     this.setWebsiteUrl(websiteUrl);
   }
 
   static make(
-    { name, description, websiteUrl }: CreateBlogDto,
+    { name, description, websiteUrl }: MakeBlogModel,
     BlogModel: BlogModelType,
   ): BlogDocument {
     const blogName = trim(String(name));
     const blogDescription = trim(String(description));
     const blogWebsiteUrl = trim(String(websiteUrl));
-    const blog = new BlogDto(blogName, blogDescription, blogWebsiteUrl);
+    const blog = new BlogEntity(blogName, blogDescription, blogWebsiteUrl);
 
     return new BlogModel(blog);
   }
