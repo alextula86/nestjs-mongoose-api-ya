@@ -165,17 +165,47 @@ export class Post extends Document {
   newestLikes: NewestLikesEntity[];
 
   setTitle(title: string) {
-    if (!trim(title)) throw new Error('Bad title value!');
+    if (!trim(title)) {
+      throw new Error('The title field is required');
+    }
+    if (trim(title).length < 3) {
+      throw new Error(`The title field must be at least 3, got ${title}`);
+    }
+    if (trim(title).length > 30) {
+      throw new Error(`The title field must be no more than 30, got ${title}`);
+    }
     this.title = title;
   }
 
   setShortDescription(shortDescription: string) {
-    if (!trim(shortDescription)) throw new Error('Bad shortDescription value!');
+    if (!trim(shortDescription)) {
+      throw new Error('The shortDescription field is required');
+    }
+    if (trim(shortDescription).length < 3) {
+      throw new Error(
+        `The shortDescription field must be at least 3, got ${shortDescription}`,
+      );
+    }
+    if (trim(shortDescription).length > 100) {
+      throw new Error(
+        `The shortDescription field must be no more than 100, got ${shortDescription}`,
+      );
+    }
     this.shortDescription = shortDescription;
   }
 
   setContent(content: string) {
-    if (!trim(content)) throw new Error('Bad content value!');
+    if (!trim(content)) {
+      throw new Error('The content field is required');
+    }
+    if (trim(content).length < 3) {
+      throw new Error(`The content field must be at least 3, got ${content}`);
+    }
+    if (trim(content).length > 1000) {
+      throw new Error(
+        `The content field must be no more than 1000, got ${content}`,
+      );
+    }
     this.content = content;
   }
 

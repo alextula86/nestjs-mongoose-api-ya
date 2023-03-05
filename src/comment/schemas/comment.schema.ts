@@ -116,7 +116,17 @@ export class Comment {
   likes: LikeStatusCommentEntity[];
 
   setContent(content: string) {
-    if (!trim(content)) throw new Error('Bad content value!');
+    if (!trim(content)) {
+      throw new Error('The content field is required');
+    }
+    if (trim(content).length < 20) {
+      throw new Error(`The content field must be at least 20, got ${content}`);
+    }
+    if (trim(content).length > 300) {
+      throw new Error(
+        `The content field must be no more than 300, got ${content}`,
+      );
+    }
     this.content = content;
   }
 

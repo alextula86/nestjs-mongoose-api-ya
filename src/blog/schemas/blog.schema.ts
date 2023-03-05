@@ -53,17 +53,44 @@ export class Blog {
   createdAt: string;
 
   setName(name: string) {
-    if (!trim(name)) throw new Error('Bad name value!');
+    if (!trim(name)) {
+      throw new Error('The name field is required');
+    }
+    if (trim(name).length < 3) {
+      throw new Error(`The name field must be at least 3, got ${name}`);
+    }
+    if (trim(name).length > 15) {
+      throw new Error(`The name field must be no more than 15, got ${name}`);
+    }
     this.name = name;
   }
 
   setDescription(description: string) {
-    if (!trim(description)) throw new Error('Bad description value!');
+    if (!trim(description)) {
+      throw new Error('The description field is required');
+    }
+    if (trim(description).length < 3) {
+      throw new Error(
+        `The description field must be at least 3, got ${description}`,
+      );
+    }
+    if (trim(description).length > 500) {
+      throw new Error(
+        `The description field must be no more than 500, got ${description}`,
+      );
+    }
     this.description = description;
   }
 
   setWebsiteUrl(websiteUrl: string) {
-    if (!trim(websiteUrl)) throw new Error('Bad websiteUrl value!');
+    if (!trim(websiteUrl)) {
+      throw new Error('The websiteUrl field is required');
+    }
+    if (trim(websiteUrl).length > 100) {
+      throw new Error(
+        `The websiteUrl field must be no more than 100, got ${websiteUrl}`,
+      );
+    }
     this.websiteUrl = websiteUrl;
   }
 
