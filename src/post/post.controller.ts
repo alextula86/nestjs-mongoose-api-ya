@@ -10,7 +10,9 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuardBasic } from '../auth.guard';
 import { ResponseViewModelDetail } from '../types';
 import { PostQueryRepository } from './post.query.repository';
 import { PostService } from './post.service';
@@ -70,6 +72,7 @@ export class PostController {
   }
   // Создание поста
   @Post()
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.CREATED)
   async createPost(
     @Body() createPostDto: CreatePostDto,
@@ -88,6 +91,7 @@ export class PostController {
   }
   // Обновление поста
   @Put(':postId')
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('postId') postId: string,
@@ -107,6 +111,7 @@ export class PostController {
   }
   // Удаление поста
   @Delete(':postId')
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostById(@Param('postId') postId: string): Promise<boolean> {
     // Удаляем пост

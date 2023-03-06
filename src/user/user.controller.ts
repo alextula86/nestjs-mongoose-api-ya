@@ -9,13 +9,16 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuardBasic } from '../auth.guard';
 import { UserQueryRepository } from './user.query.repository';
 import { UserService } from './user.service';
 import { ResponseViewModelDetail } from '../types';
 import { QueryUserModel, UserViewModel } from './types';
 import { CreateUserDto } from './dto/user.dto';
 
+@UseGuards(AuthGuardBasic)
 @Controller('api/users')
 export class UserController {
   constructor(

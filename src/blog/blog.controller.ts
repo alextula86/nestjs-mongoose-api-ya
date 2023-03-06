@@ -10,7 +10,9 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuardBasic } from '../auth.guard';
 import { BlogService } from './blog.service';
 import { PostService } from '../post/post.service';
 import { BlogQueryRepository } from './blog.query.repository';
@@ -68,6 +70,7 @@ export class BlogController {
   }
   // Создание блогера
   @Post()
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
     @Body() createBlogDto: CreateBlogDto,
@@ -86,6 +89,7 @@ export class BlogController {
   }
   // Обновление блогера
   @Put(':blogId')
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Param('blogId') blogId: string,
@@ -105,6 +109,7 @@ export class BlogController {
   }
   // Удаление блогера
   @Delete(':blogId')
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlogById(@Param('blogId') blogId: string): Promise<boolean> {
     // Удаляем блогера
@@ -153,6 +158,7 @@ export class BlogController {
   }
   // Создание поста по идентификатору блогера
   @Post(':blogId/posts')
+  @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.CREATED)
   async createPostsByBlogId(
     @Param() { blogId }: BlogIdDto,
