@@ -6,12 +6,11 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { jwtService } from './application';
-import { UserService } from './user/user.service';
 
 @Injectable()
 export class AuthGuardBasic implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request & any = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const authorization = request.headers.authorization;
 
     if (!authorization) {
@@ -36,26 +35,46 @@ export class AuthGuardBasic implements CanActivate {
 
 @Injectable()
 export class AuthGuardBearer implements CanActivate {
-  constructor(private readonly userService: UserService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request & any = context.switchToHttp().getRequest();
-
+    const request: Request & { userId: string } = context
+      .switchToHttp()
+      .getRequest();
     const authorization = request.headers.authorization;
-    console.log('authorization', authorization);
+
     if (!authorization) {
       throw new UnauthorizedException();
     }
 
     const [authType, authToken] = authorization.split(' ');
     const userId = await jwtService.getUserIdByAccessToken(authToken);
-    console.log('userId', userId);
+
     if (authType !== 'Bearer' || !userId) {
       throw new UnauthorizedException();
     }
 
-    const user = await this.userService.findUserById(userId);
+    request.userId = userId;
 
-    if (!user) {
+    return true;
+  }
+}
+
+@Injectable()
+export class AuthGuardRefreshToken implements CanActivate {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request & { userId: string } = context
+      .switchToHttp()
+      .getRequest();
+    console.log('request', request);
+    console.log('request.cookies', request.cookies);
+    const refreshToken = request.cookies?.refreshToken;
+    console.log('refreshToken', refreshToken);
+    if (!refreshToken) {
+      throw new UnauthorizedException();
+    }
+
+    const userId = await jwtService.getUserIdByRefreshToken(refreshToken);
+    console.log('userId', userId);
+    if (!userId) {
       throw new UnauthorizedException();
     }
 

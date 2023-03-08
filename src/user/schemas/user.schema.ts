@@ -6,8 +6,8 @@ import { AccountDataSchema } from './accountData.schema';
 import { EmailConfirmationSchema } from './emailConfirmation.schema';
 import { PasswordRecoverySchema } from './passwordRecovery.schema';
 import { UserEntity } from '../entity';
-import { bcryptService } from '../../application';
-import { generateUUID } from '../../utils';
+import { bcryptService, jwtService } from '../../application';
+import { generateUUID, getNextStrId } from '../../utils';
 import {
   AccountDataType,
   EmailConfirmationType,
@@ -48,9 +48,40 @@ export class User {
   })
   refreshToken: string;
 
-  setRefreshToken(refreshToken: string) {
+  updateRefreshToken(refreshToken: string) {
     if (!refreshToken) throw new Error('Bad refreshToken value!');
     this.refreshToken = refreshToken;
+  }
+
+  async isCheckCredentials(password: string) {
+    if (!password) throw new Error('Bad password value!');
+    const passwordSalt = this.accountData.passwordHash.slice(0, 29);
+    const passwordHash = await bcryptService.generateHash(
+      password,
+      passwordSalt,
+    );
+
+    return passwordHash === this.accountData.passwordHash;
+  }
+
+  async generateRefreshTokenData(userId: string) {
+    const deviceId = getNextStrId();
+    // Формируем access токен
+    const accessToken = await jwtService.createAccessToken(userId);
+    // Формируем refresh токен
+    const refreshToken = await jwtService.createRefreshToken(userId, deviceId);
+    const expRefreshToken = await jwtService.getExpRefreshToken(refreshToken);
+
+    if (!expRefreshToken) {
+      return null;
+    }
+
+    return {
+      accessToken,
+      refreshToken,
+      expRefreshToken,
+      deviceId,
+    };
   }
 
   static async make(
@@ -104,7 +135,9 @@ export type UserModelType = Model<UserDocument> & UserStaticsType;
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.methods = {
-  setRefreshToken: User.prototype.setRefreshToken,
+  updateRefreshToken: User.prototype.updateRefreshToken,
+  isCheckCredentials: User.prototype.isCheckCredentials,
+  generateRefreshTokenData: User.prototype.generateRefreshTokenData,
 };
 
 UserSchema.statics = {
