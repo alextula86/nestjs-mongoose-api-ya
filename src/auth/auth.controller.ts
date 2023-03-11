@@ -19,7 +19,7 @@ import { UserAuthViewModel } from './types';
 import {
   AuthUserDto,
   RegistrationConfirmationDto,
-  RegistrationEmailResendingDto,
+  RegistrationEmailDto,
   RegistrationUserDto,
 } from './dto';
 import { AuthQueryRepository } from './auth.query.repository';
@@ -31,7 +31,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly authQueryRepository: AuthQueryRepository,
   ) {}
-  // Получение списка пользователей
+  // Получение данных о пользователе
   @Get('me')
   @UseGuards(AuthGuardRefreshToken)
   @HttpCode(HttpStatus.OK)
@@ -156,14 +156,27 @@ export class AuthController {
   @Post('/registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(
-    @Body() registrationEmailResendingDto: RegistrationEmailResendingDto,
+    @Body() registrationEmailDto: RegistrationEmailDto,
   ): Promise<void> {
     // Повторно формируем код подтверждения email, обновляем код у пользователя и отправляем письмо
     const { statusCode, statusMessage } =
-      await this.authService.registrationEmailResending(
-        registrationEmailResendingDto,
-      );
+      await this.authService.registrationEmailResending(registrationEmailDto);
     // Если новый код подтверждения email не сформирован или не сохранен для пользователя или письмо не отправлено,
+    // возвращаем статус 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+  }
+  // Восстановление пароля с помощью подтверждения по электронной почте.
+  @Post('/password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async passwordRecovery(
+    @Body() registrationEmailDto: RegistrationEmailDto,
+  ): Promise<void> {
+    // Повторно формируем код востановления пароля, обновляем код у пользователя и отправляем письмо
+    const { statusCode, statusMessage } =
+      await this.authService.passwordRecovery(registrationEmailDto);
+    // Если код востановления пароля не сформирован или не сохранен для пользователя или письмо не отправлено,
     // возвращаем статус 400
     if (statusCode === HttpStatus.BAD_REQUEST) {
       throw new BadRequestException(statusMessage);

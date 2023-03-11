@@ -6,7 +6,7 @@ import { validateOrRejectModel } from '../validate';
 import {
   AuthUserDto,
   RegistrationConfirmationDto,
-  RegistrationEmailResendingDto,
+  RegistrationEmailDto,
   RegistrationUserDto,
 } from './dto';
 import { getNextStrId } from '../utils';
@@ -30,6 +30,7 @@ export class AuthService {
 
     return foundUser;
   }
+  // Аутентификация пользователя
   async checkCredentials(
     ip: string,
     deviceTitle: string,
@@ -77,6 +78,7 @@ export class AuthService {
     // Возвращаем accessToken
     return { accessToken, refreshToken };
   }
+  // Выход пользователя из системы
   async logout(
     userId: string,
     deviceId: string,
@@ -104,6 +106,7 @@ export class AuthService {
       statusMessage: 'Logout',
     };
   }
+  // Получение access токена и refresh токена
   async refreshToken(
     userId: string,
     deviceId: string,
@@ -116,14 +119,14 @@ export class AuthService {
     if (!user || !device) {
       return null;
     }
-    // Обновляем accessToken, refreshToken и дату истекания срока refreshToken
+    // Обновляем access токен, refresh токен и дату истекания срока refreshToken
     const authTokens = await user.generateAuthTokens(user.id, device.deviceId);
     // Если возникла ошибка в формировании токенов, то вернем null для возрвата 401 ошибки
     if (!authTokens) {
       return null;
     }
     const { accessToken, refreshToken, expRefreshToken } = authTokens;
-    // Обновляем refreshToken пользователя
+    // Обновляем refresh токен пользователя
     user.updateRefreshToken(refreshToken);
     // Сохраняем пользователя в базе
     await this.userRepository.save(user);
@@ -134,6 +137,7 @@ export class AuthService {
 
     return { accessToken, refreshToken };
   }
+  // Регистрация пользователя
   async registerUser(registrationUserDto: RegistrationUserDto): Promise<{
     statusCode: HttpStatus;
     statusMessage: [{ message: string; field?: string }];
@@ -267,17 +271,14 @@ export class AuthService {
   }
   // Повторная отправка кода подтверждения аккаунта на email
   async registrationEmailResending(
-    registrationEmailResendingDto: RegistrationEmailResendingDto,
+    registrationEmailDto: RegistrationEmailDto,
   ): Promise<{
     statusCode: HttpStatus;
     statusMessage: [{ message: string; field?: string }];
   }> {
-    await validateOrRejectModel(
-      registrationEmailResendingDto,
-      RegistrationEmailResendingDto,
-    );
+    await validateOrRejectModel(registrationEmailDto, RegistrationEmailDto);
     // Получаем код из DTO
-    const { email } = registrationEmailResendingDto;
+    const { email } = registrationEmailDto;
     // Ищем пользователя по email
     const user = await this.userRepository.findByLoginOrEmail(email);
     // Если пользователь по email не найден, возвращаем ошибку 400
@@ -331,6 +332,57 @@ export class AuthService {
         statusCode: HttpStatus.BAD_REQUEST,
         statusMessage: [
           { message: 'The update confirmation code has not been executed' },
+        ],
+      };
+    }
+  }
+  // Отправка кода для востановления пароля
+  async passwordRecovery(registrationEmailDto: RegistrationEmailDto): Promise<{
+    statusCode: HttpStatus;
+    statusMessage: [{ message: string; field?: string }];
+  }> {
+    await validateOrRejectModel(registrationEmailDto, RegistrationEmailDto);
+    // Получаем код из DTO
+    const { email } = registrationEmailDto;
+    // Ищем пользователя по email
+    const user = await this.userRepository.findByLoginOrEmail(email);
+    // Если пользователь по email не найден, возвращаем ошибку 400
+    if (!user) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: 'The user is not registered in the system',
+            field: 'email',
+          },
+        ],
+      };
+    }
+    // Обновляем код востановления пароля
+    user.updateRecoveryCodeByEmail();
+    // Обновляем пользователя в базе
+    const updatedUser = await this.userRepository.save(user);
+    // Отправляем письмо с новым кодом востановления пароля
+    try {
+      // Если обновление кода востановления пароля прошло успешно, отправляем письмо
+      await this.emailManager.sendEmailWithRecoveryCode(
+        email,
+        updatedUser.passwordRecovery.recoveryCode,
+      );
+      // Возвращаем результат обнорвления кода востановления пароля
+      return {
+        statusCode: HttpStatus.NO_CONTENT,
+        statusMessage: [
+          { message: 'The update recovery code has been executed' },
+        ],
+      };
+    } catch (error) {
+      // Если письмо по какой-либо причине не было отправлено
+      // Возвращаем ошибку
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          { message: 'The update recovery code has not been executed' },
         ],
       };
     }

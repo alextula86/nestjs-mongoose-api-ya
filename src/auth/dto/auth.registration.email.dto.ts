@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-export class RegistrationEmailResendingDto {
+export class RegistrationEmailDto {
   @IsNotEmpty({
     message: 'The email field is required',
   })

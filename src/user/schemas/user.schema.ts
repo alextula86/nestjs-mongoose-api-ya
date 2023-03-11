@@ -93,6 +93,16 @@ export class User {
     // Записываем код для подтверждения email
     this.emailConfirmation.confirmationCode = confirmationCode;
   }
+  // Обновление кода востановления пароля
+  updateRecoveryCodeByEmail() {
+    // Генерируем код для востановления пароля
+    const recoveryCode = generateUUID();
+    // Генерируем дату истечения востановления пароля
+    const expirationDate = add(new Date(), { hours: 1, minutes: 30 });
+    this.passwordRecovery.recoveryCode = recoveryCode;
+    this.passwordRecovery.expirationDate = expirationDate;
+    this.passwordRecovery.isRecovered = false;
+  }
   // Аутентификация пользователя
   async isCheckCredentials(password: string) {
     // Если пароль не передан, возвращаем ошибку
@@ -127,7 +137,6 @@ export class User {
       expRefreshToken,
     };
   }
-
   static async make(
     { login, password, email }: MakeUserModel,
     UserModel: UserModelType,
@@ -182,6 +191,7 @@ UserSchema.methods = {
   updateRefreshToken: User.prototype.updateRefreshToken,
   canBeConfirmed: User.prototype.canBeConfirmed,
   updateConfirmationCode: User.prototype.updateConfirmationCode,
+  updateRecoveryCodeByEmail: User.prototype.updateRecoveryCodeByEmail,
   confirm: User.prototype.confirm,
   isCheckCredentials: User.prototype.isCheckCredentials,
   generateAuthTokens: User.prototype.generateAuthTokens,
