@@ -3,7 +3,11 @@ import { UserRepository } from '../user/user.repository';
 import { DeviceRepository } from '../device/device.repository';
 import { UserDocument } from '../user/schemas';
 import { validateOrRejectModel } from '../validate';
-import { AuthUserDto, RegistrationUserDto } from './dto';
+import {
+  AuthUserDto,
+  RegistrationConfirmationDto,
+  RegistrationUserDto,
+} from './dto';
 import { getNextStrId } from '../utils';
 import { EmailManager } from '../managers';
 
@@ -176,5 +180,45 @@ export class AuthService {
         statusMessage: `User creation error`,
       };
     }
+  }
+  async registrationConfirmation(
+    registrationConfirmationDto: RegistrationConfirmationDto,
+  ): Promise<{
+    statusCode: HttpStatus;
+    statusMessage: string;
+  }> {
+    await validateOrRejectModel(
+      registrationConfirmationDto,
+      RegistrationConfirmationDto,
+    );
+    // Получаем код из DTO
+    const { code } = registrationConfirmationDto;
+    // Ищем пользователя по коду подтверждения email
+    const user = await this.userRepository.findByConfirmationCode(code);
+    // Если пользователь по коду подтверждения email не найден, возвращаем false
+    if (!user) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: `Code is incorrectly`,
+      };
+    }
+    // Если дата для подтверждения email по коду просрочена
+    // Если email уже подтвержден
+    // Возвращаем ошибку
+    if (!user.canBeConfirmed()) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: `Code is incorrectly`,
+      };
+    }
+    // Обновляем признак подтвержения
+    user.confirm();
+    // Обновляем пользователя в базе
+    await this.userRepository.save(user);
+
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      statusMessage: 'Registration confirmation done',
+    };
   }
 }

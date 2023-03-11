@@ -16,7 +16,11 @@ import { Request, Response } from 'express';
 import { AuthGuardRefreshToken } from '../auth.guard';
 import { AuthService } from './auth.service';
 import { UserAuthViewModel } from './types';
-import { AuthUserDto, RegistrationUserDto } from './dto/auth.dto';
+import {
+  AuthUserDto,
+  RegistrationConfirmationDto,
+  RegistrationUserDto,
+} from './dto';
 import { AuthQueryRepository } from './auth.query.repository';
 import { AuthAccessTokenModel } from './types/AuthUserModel';
 
@@ -44,7 +48,7 @@ export class AuthController {
     // Возвращаем аутентифицированного пользователя в формате ответа пользователю
     return foundAuthUser;
   }
-  // Получение списка пользователей
+  // Аутентификация пользователя
   @Post('/login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -72,6 +76,7 @@ export class AuthController {
     // Возвращаем сформированный access токен
     return { accessToken };
   }
+  // logout пользователя
   @Post('/logout')
   @UseGuards(AuthGuardRefreshToken)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -90,6 +95,7 @@ export class AuthController {
     // Удаляем refresh токен из cookie
     response.clearCookie('refreshToken');
   }
+  // Получить refresh токен
   @Post('refresh-token')
   @UseGuards(AuthGuardRefreshToken)
   @HttpCode(HttpStatus.OK)
@@ -125,6 +131,22 @@ export class AuthController {
       registrationUserDto,
     );
     // Если при регистрации пользователя возникли ошибки возращаем статус ошибки
+    if (statusCode !== HttpStatus.NO_CONTENT) {
+      throw new HttpException(statusMessage, statusCode);
+    }
+  }
+  // Подтверждение email по коду
+  @Post('/registration-confirmation')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationConfirmation(
+    @Body() registrationConfirmationDto: RegistrationConfirmationDto,
+  ): Promise<void> {
+    // Проверяем код подтверждения email
+    const { statusCode, statusMessage } =
+      await this.authService.registrationConfirmation(
+        registrationConfirmationDto,
+      );
+    // Если при проверке кода подтверждения email
     if (statusCode !== HttpStatus.NO_CONTENT) {
       throw new HttpException(statusMessage, statusCode);
     }

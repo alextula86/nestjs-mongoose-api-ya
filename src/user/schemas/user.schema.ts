@@ -53,6 +53,25 @@ export class User {
     this.refreshToken = refreshToken;
   }
 
+  canBeConfirmed() {
+    if (this.emailConfirmation.expirationDate < new Date()) {
+      return false;
+    }
+
+    if (this.emailConfirmation.isConfirmed) {
+      return false;
+    }
+
+    return true;
+  }
+
+  confirm() {
+    if (!this.canBeConfirmed()) throw new Error(`Account can't be confirm!`);
+    if (this.emailConfirmation.isConfirmed)
+      throw new Error(`Already confirmed account can't be confirmed again!`);
+    this.emailConfirmation.isConfirmed = true;
+  }
+
   async isCheckCredentials(password: string) {
     if (!password) throw new Error('Bad password value!');
     const passwordSalt = this.accountData.passwordHash.slice(0, 29);
@@ -134,6 +153,8 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.methods = {
   updateRefreshToken: User.prototype.updateRefreshToken,
+  canBeConfirmed: User.prototype.canBeConfirmed,
+  confirm: User.prototype.confirm,
   isCheckCredentials: User.prototype.isCheckCredentials,
   generateAuthTokens: User.prototype.generateAuthTokens,
 };
