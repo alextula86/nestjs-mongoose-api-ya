@@ -6,6 +6,7 @@ import { validateOrRejectModel } from '../validate';
 import {
   AuthUserDto,
   RegistrationConfirmationDto,
+  RegistrationEmailResendingDto,
   RegistrationUserDto,
 } from './dto';
 import { getNextStrId } from '../utils';
@@ -135,11 +136,44 @@ export class AuthService {
   }
   async registerUser(registrationUserDto: RegistrationUserDto): Promise<{
     statusCode: HttpStatus;
-    statusMessage: string;
+    statusMessage: [{ message: string; field?: string }];
   }> {
     await validateOrRejectModel(registrationUserDto, RegistrationUserDto);
 
     const { login, password, email } = registrationUserDto;
+    // Проверяем добавлен ли пользователь с переданным логином
+    const foundUserByLogin = await this.userRepository.findByLoginOrEmail(
+      login,
+    );
+    // Если пользователь с переданным логином уже добавлен в базе, возвращаем ошибку 400
+    if (foundUserByLogin) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `The user is already registered in the system`,
+            field: 'login',
+          },
+        ],
+      };
+    }
+    // Проверяем добавлен ли пользователь с переданным email
+    const foundUserByEmail = await this.userRepository.findByLoginOrEmail(
+      email,
+    );
+    // Если пользователь с переданным email уже добавлен в базе, возвращаем ошибку 400
+    if (foundUserByEmail) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `The user is already registered in the system`,
+            field: 'email',
+          },
+        ],
+      };
+    }
+
     // Создаем документ пользователя
     const madeUser = await this.userRepository.createUser({
       login,
@@ -156,7 +190,7 @@ export class AuthService {
     if (!foundRegisteredUser) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        statusMessage: `User creation error`,
+        statusMessage: [{ message: 'User creation error' }],
       };
     }
 
@@ -169,7 +203,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.NO_CONTENT,
-        statusMessage: 'User registered',
+        statusMessage: [{ message: 'User registered' }],
       };
     } catch (error) {
       // Если письмо не отправилось, то удаляем добавленного пользователя
@@ -177,7 +211,7 @@ export class AuthService {
       // Возвращаем ошибку
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        statusMessage: `User creation error`,
+        statusMessage: [{ message: 'User creation error' }],
       };
     }
   }
@@ -185,7 +219,7 @@ export class AuthService {
     registrationConfirmationDto: RegistrationConfirmationDto,
   ): Promise<{
     statusCode: HttpStatus;
-    statusMessage: string;
+    statusMessage: [{ message: string; field?: string }];
   }> {
     await validateOrRejectModel(
       registrationConfirmationDto,
@@ -195,11 +229,16 @@ export class AuthService {
     const { code } = registrationConfirmationDto;
     // Ищем пользователя по коду подтверждения email
     const user = await this.userRepository.findByConfirmationCode(code);
-    // Если пользователь по коду подтверждения email не найден, возвращаем false
+    // Если пользователь по коду подтверждения email не найден, возвращаем ошибку 400
     if (!user) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        statusMessage: `Code is incorrectly`,
+        statusMessage: [
+          {
+            message: 'The user is not registered in the system',
+            field: 'code',
+          },
+        ],
       };
     }
     // Если дата для подтверждения email по коду просрочена
@@ -208,7 +247,12 @@ export class AuthService {
     if (!user.canBeConfirmed()) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        statusMessage: `Code is incorrectly`,
+        statusMessage: [
+          {
+            message: 'Code is incorrectly',
+            field: 'code',
+          },
+        ],
       };
     }
     // Обновляем признак подтвержения
@@ -218,7 +262,77 @@ export class AuthService {
 
     return {
       statusCode: HttpStatus.NO_CONTENT,
-      statusMessage: 'Registration confirmation done',
+      statusMessage: [{ message: 'Registration confirmation done' }],
     };
+  }
+  // Повторная отправка кода подтверждения аккаунта на email
+  async registrationEmailResending(
+    registrationEmailResendingDto: RegistrationEmailResendingDto,
+  ): Promise<{
+    statusCode: HttpStatus;
+    statusMessage: [{ message: string; field?: string }];
+  }> {
+    await validateOrRejectModel(
+      registrationEmailResendingDto,
+      RegistrationEmailResendingDto,
+    );
+    // Получаем код из DTO
+    const { email } = registrationEmailResendingDto;
+    // Ищем пользователя по email
+    const user = await this.userRepository.findByLoginOrEmail(email);
+    // Если пользователь по email не найден, возвращаем ошибку 400
+    if (!user) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: 'The user is not registered in the system',
+            field: 'email',
+          },
+        ],
+      };
+    }
+    // Если дата для подтверждения email по коду просрочена
+    // Если email уже подтвержден
+    // Возвращаем ошибку
+    if (!user.canBeConfirmed()) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `Account can't be confirm!`,
+            field: 'email',
+          },
+        ],
+      };
+    }
+    // Обновляем кода подтверждения аккаунта
+    user.updateConfirmationCode();
+    // Обновляем пользователя в базе
+    const updatedUser = await this.userRepository.save(user);
+    // Отправляем письмо с новым кодом подтверждения аккаунта
+    try {
+      // Если обновление кода подтверждения email прошло успешно, отправляем письмо
+      await this.emailManager.sendEmailCreatedUser(
+        email,
+        updatedUser.emailConfirmation.confirmationCode,
+      );
+      // Возвращаем результат обнорвления кода подтверждения email
+      return {
+        statusCode: HttpStatus.NO_CONTENT,
+        statusMessage: [
+          { message: 'The update confirmation code has been executed' },
+        ],
+      };
+    } catch (error) {
+      // Если письмо по какой-либо причине не было отправлено
+      // Возвращаем ошибку
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          { message: 'The update confirmation code has not been executed' },
+        ],
+      };
+    }
   }
 }

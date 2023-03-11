@@ -6,11 +6,11 @@ export class RegistrationConfirmationDto {
     message: 'The code field is required',
   })
   @IsString({
-    message: 'recoveryCodeError is incorrectly',
+    message: 'The code field must be a string',
   })
   @Transform(({ value }) => value.trim())
   @IsUUID('all', {
-    message: 'code is incorrectly',
+    message: 'The code is incorrectly',
   })
   code: string;
 }

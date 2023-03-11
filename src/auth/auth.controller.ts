@@ -1,9 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Ip,
   Post,
@@ -19,6 +19,7 @@ import { UserAuthViewModel } from './types';
 import {
   AuthUserDto,
   RegistrationConfirmationDto,
+  RegistrationEmailResendingDto,
   RegistrationUserDto,
 } from './dto';
 import { AuthQueryRepository } from './auth.query.repository';
@@ -131,8 +132,8 @@ export class AuthController {
       registrationUserDto,
     );
     // Если при регистрации пользователя возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.NO_CONTENT) {
-      throw new HttpException(statusMessage, statusCode);
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
     }
   }
   // Подтверждение email по коду
@@ -146,9 +147,26 @@ export class AuthController {
       await this.authService.registrationConfirmation(
         registrationConfirmationDto,
       );
-    // Если при проверке кода подтверждения email
-    if (statusCode !== HttpStatus.NO_CONTENT) {
-      throw new HttpException(statusMessage, statusCode);
+    // Если при проверке кода подтверждения email возникли ошибки возвращаем статус и текст ошибки
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+  }
+  // Повторная отправка кода подтверждения email
+  @Post('/registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationEmailResending(
+    @Body() registrationEmailResendingDto: RegistrationEmailResendingDto,
+  ): Promise<void> {
+    // Повторно формируем код подтверждения email, обновляем код у пользователя и отправляем письмо
+    const { statusCode, statusMessage } =
+      await this.authService.registrationEmailResending(
+        registrationEmailResendingDto,
+      );
+    // Если новый код подтверждения email не сформирован или не сохранен для пользователя или письмо не отправлено,
+    // возвращаем статус 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
     }
   }
 }
