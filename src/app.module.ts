@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
 /*import { BlogModule } from './blog/blog.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
@@ -37,6 +38,8 @@ import { PostQueryRepository } from './post/post.query.repository';
 import { CommentQueryRepository } from './comment/comment.query.repository';
 import { DeviceQueryRepository } from './device/device.query.repository';
 import { AuthQueryRepository } from './auth/auth.query.repository';
+import { EmailAdapter } from './adapters';
+import { EmailManager } from './managers';
 
 @Module({
   /*imports: [
@@ -61,6 +64,18 @@ import { AuthQueryRepository } from './auth/auth.query.repository';
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
+    MailerModule.forRoot({
+      transport: {
+        service: 'gmail',
+        auth: {
+          user: 'a.marcuk2023@gmail.com',
+          pass: 'suflbzalydymjqnt',
+        },
+      },
+      defaults: {
+        from: '"nestjs-video-api" <a.marcuk2023@gmail.com>',
+      },
+    }),
   ],
   controllers: [
     AppController,
@@ -91,6 +106,8 @@ import { AuthQueryRepository } from './auth/auth.query.repository';
     DeviceService,
     DeviceRepository,
     DeviceQueryRepository,
+    EmailManager,
+    EmailAdapter,
   ],
   exports: [
     BlogService,

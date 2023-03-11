@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Ip,
   Post,
@@ -14,10 +15,8 @@ import {
 import { Request, Response } from 'express';
 import { AuthGuardRefreshToken } from '../auth.guard';
 import { AuthService } from './auth.service';
-import { UserQueryRepository } from '../user/user.query.repository';
-import { UserService } from '../user/user.service';
 import { UserAuthViewModel } from './types';
-import { AuthUserDto } from './dto/auth.dto';
+import { AuthUserDto, RegistrationUserDto } from './dto/auth.dto';
 import { AuthQueryRepository } from './auth.query.repository';
 import { AuthAccessTokenModel } from './types/AuthUserModel';
 
@@ -25,8 +24,6 @@ import { AuthAccessTokenModel } from './types/AuthUserModel';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService,
-    private readonly userQueryRepository: UserQueryRepository,
     private readonly authQueryRepository: AuthQueryRepository,
   ) {}
   // Получение списка пользователей
@@ -66,12 +63,70 @@ export class AuthController {
     if (!authUserTokens) {
       throw new UnauthorizedException();
     }
+    const { accessToken, refreshToken } = authUserTokens;
     // Пишем новый refresh токен в cookie
-    response.cookie('refreshToken', authUserTokens.refreshToken, {
+    response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
     });
-     // Возвращаем сформированный access токен
-    return { accessToken: authUserTokens.accessToken };
+    // Возвращаем сформированный access токен
+    return { accessToken };
+  }
+  @Post('/logout')
+  @UseGuards(AuthGuardRefreshToken)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(
+    @Req() request: Request & { userId: string; deviceId: string },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const { statusCode } = await this.authService.logout(
+      request.userId,
+      request.deviceId,
+    );
+    // Если при logout возникли ошибки возращаем статус ошибки 401
+    if (statusCode !== HttpStatus.NO_CONTENT) {
+      throw new UnauthorizedException();
+    }
+    // Удаляем refresh токен из cookie
+    response.clearCookie('refreshToken');
+  }
+  @Post('refresh-token')
+  @UseGuards(AuthGuardRefreshToken)
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Req() request: Request & { userId: string; deviceId: string },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthAccessTokenModel> {
+    const authUserTokens = await this.authService.refreshToken(
+      request.userId,
+      request.deviceId,
+    );
+    // Если при logout возникли ошибки возращаем статус ошибки 401
+    if (!authUserTokens) {
+      throw new UnauthorizedException();
+    }
+    const { accessToken, refreshToken } = authUserTokens;
+    // Пишем новый refresh токен в cookie
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+
+    return { accessToken };
+  }
+  // Регистрация пользователя
+  @Post('registration')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registration(
+    @Body() registrationUserDto: RegistrationUserDto,
+  ): Promise<void> {
+    // Регестрируем пользователя
+    const { statusCode, statusMessage } = await this.authService.registerUser(
+      registrationUserDto,
+    );
+    // Если при регистрации пользователя возникли ошибки возращаем статус ошибки
+    if (statusCode !== HttpStatus.NO_CONTENT) {
+      throw new HttpException(statusMessage, statusCode);
+    }
   }
 }

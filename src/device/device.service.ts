@@ -52,7 +52,14 @@ export class DeviceService {
     statusCode: HttpStatus;
     statusMessage: string;
   }> {
-    // Если идентификатор устройства не передан, возвращаем ошибку
+    // Если идентификатор пользователя не передан, возвращаем ошибку 401
+    if (!userId) {
+      return {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        statusMessage: `The user ${userId} is unauthorized`,
+      };
+    }
+    // Если идентификатор устройства не передан, возвращаем ошибку 404
     if (!deviceId) {
       return {
         statusCode: HttpStatus.NOT_FOUND,
@@ -61,7 +68,7 @@ export class DeviceService {
     }
     // Ищем устройство по его идентификатору
     const foundDevice = await this.deviceRepository.findDeviceById(deviceId);
-    // Если устройство не найдено, возвращаем ошибку
+    // Если устройство не найдено, возвращаем ошибку 404
     if (isEmpty(foundDevice)) {
       return {
         statusCode: HttpStatus.NOT_FOUND,
@@ -76,7 +83,17 @@ export class DeviceService {
       };
     }
     // Удаляем устройство
-    await this.deviceRepository.deleteDeviceById(deviceId, userId);
+    const isDeletedDevice = await this.deviceRepository.deleteDeviceById(
+      deviceId,
+      userId,
+    );
+    // Если устройство не было удалено, возвращаем ошибку 404
+    if (!isDeletedDevice) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        statusMessage: `Device with id ${deviceId} was not found`,
+      };
+    }
     return {
       statusCode: HttpStatus.NO_CONTENT,
       statusMessage: 'Device deleted',
@@ -90,6 +107,12 @@ export class DeviceService {
     statusCode: HttpStatus;
     statusMessage: string;
   }> {
+    if (!userId || !currentDeviceId) {
+      return {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        statusMessage: `The user ${userId} is unauthorized`,
+      };
+    }
     // Удаляем все устройства, кроме текущего устройства
     const isDeleteAllDevices = await this.deviceRepository.deleteAllDevices(
       currentDeviceId,

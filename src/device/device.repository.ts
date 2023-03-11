@@ -12,13 +12,13 @@ export class DeviceRepository {
   }
   // Поиск документа конкретного устройства по его идентификатору
   async findDeviceById(deviceId: string): Promise<DeviceDocument | null> {
-    const foundUser = await this.DeviceModel.findOne({ deviceId });
+    const foundDevice = await this.DeviceModel.findOne({ deviceId });
 
-    if (!foundUser) {
+    if (!foundDevice) {
       return null;
     }
 
-    return foundUser;
+    return foundDevice;
   }
   // Создаем документ пользователя
   async createDevice({
@@ -28,12 +28,12 @@ export class DeviceRepository {
     userId,
     lastActiveDate,
   }: MakeDeviceModel): Promise<DeviceDocument> {
-    const madeUser = this.DeviceModel.make(
+    const madeDevice = this.DeviceModel.make(
       { deviceId, ip, title, userId, lastActiveDate },
       this.DeviceModel,
     );
 
-    return madeUser;
+    return madeDevice;
   }
   // Удаление устройства
   async deleteDeviceById(deviceId: string, userId: string): Promise<boolean> {

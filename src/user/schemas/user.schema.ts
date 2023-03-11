@@ -7,7 +7,7 @@ import { EmailConfirmationSchema } from './emailConfirmation.schema';
 import { PasswordRecoverySchema } from './passwordRecovery.schema';
 import { UserEntity } from '../entity';
 import { bcryptService, jwtService } from '../../application';
-import { generateUUID, getNextStrId } from '../../utils';
+import { generateUUID } from '../../utils';
 import {
   AccountDataType,
   EmailConfirmationType,
@@ -64,8 +64,7 @@ export class User {
     return passwordHash === this.accountData.passwordHash;
   }
 
-  async generateRefreshTokenData(userId: string) {
-    const deviceId = getNextStrId();
+  async generateAuthTokens(userId: string, deviceId: string) {
     // Формируем access токен
     const accessToken = await jwtService.createAccessToken(userId);
     // Формируем refresh токен
@@ -80,7 +79,6 @@ export class User {
       accessToken,
       refreshToken,
       expRefreshToken,
-      deviceId,
     };
   }
 
@@ -137,7 +135,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.methods = {
   updateRefreshToken: User.prototype.updateRefreshToken,
   isCheckCredentials: User.prototype.isCheckCredentials,
-  generateRefreshTokenData: User.prototype.generateRefreshTokenData,
+  generateAuthTokens: User.prototype.generateAuthTokens,
 };
 
 UserSchema.statics = {

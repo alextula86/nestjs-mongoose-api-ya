@@ -16,7 +16,7 @@ export class DeviceQueryRepository {
       ip: item.ip,
       title: item.title,
       lastActiveDate: item.lastActiveDate,
-      deviceId: item.id,
+      deviceId: item.deviceId,
     }));
   }
 }

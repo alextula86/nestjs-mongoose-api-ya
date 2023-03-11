@@ -61,24 +61,25 @@ export class AuthGuardBearer implements CanActivate {
 @Injectable()
 export class AuthGuardRefreshToken implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request & { userId: string } = context
+    const request: Request & { userId: string; deviceId: string } = context
       .switchToHttp()
       .getRequest();
-    console.log('request', request);
-    console.log('request.cookies', request.cookies);
     const refreshToken = request.cookies?.refreshToken;
-    console.log('refreshToken', refreshToken);
+
     if (!refreshToken) {
       throw new UnauthorizedException();
     }
 
-    const userId = await jwtService.getUserIdByRefreshToken(refreshToken);
-    console.log('userId', userId);
-    if (!userId) {
+    const result = await jwtService.getRefreshTokenUserIdAndDeviceId(
+      refreshToken,
+    );
+
+    if (!result.userId || !result.deviceId) {
       throw new UnauthorizedException();
     }
 
-    request.userId = userId;
+    request.userId = result.userId;
+    request.deviceId = result.deviceId;
 
     return true;
   }

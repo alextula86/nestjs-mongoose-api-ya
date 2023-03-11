@@ -25,10 +25,13 @@ export const jwtService = {
       return null;
     }
   },
-  async getUserIdByRefreshToken(token: string) {
+  async getRefreshTokenUserIdAndDeviceId(token: string) {
     try {
       const result: any = jwt.verify(token, settings.REFRESH_TOKEN_SECRET);
-      return result.userId;
+      return {
+        userId: result.userId,
+        deviceId: result.deviceId,
+      };
     } catch (error) {
       console.log(error);
       return null;
