@@ -13,7 +13,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthCountRequests, AuthGuardRefreshToken } from '../auth.guard';
+import {
+  AuthCountRequests,
+  AuthGuardBearer,
+  AuthGuardRefreshToken,
+} from '../auth.guard';
 import { AuthService } from './auth.service';
 import { UserAuthViewModel } from './types';
 import {
@@ -34,7 +38,7 @@ export class AuthController {
   ) {}
   // Получение данных о пользователе
   @Get('me')
-  @UseGuards(AuthGuardRefreshToken)
+  @UseGuards(AuthGuardBearer)
   @HttpCode(HttpStatus.OK)
   async me(
     @Req() request: Request & { userId: string },
