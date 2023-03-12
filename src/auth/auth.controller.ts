@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthGuardRefreshToken } from '../auth.guard';
+import { AuthCountRequests, AuthGuardRefreshToken } from '../auth.guard';
 import { AuthService } from './auth.service';
 import { UserAuthViewModel } from './types';
 import {
@@ -52,6 +52,7 @@ export class AuthController {
   }
   // Аутентификация пользователя
   @Post('/login')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.OK)
   async login(
     @Req() request: Request,
@@ -124,6 +125,7 @@ export class AuthController {
   }
   // Регистрация пользователя
   @Post('registration')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
     @Body() registrationUserDto: RegistrationUserDto,
@@ -139,6 +141,7 @@ export class AuthController {
   }
   // Подтверждение email по коду
   @Post('/registration-confirmation')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationConfirmation(
     @Body() registrationConfirmationDto: RegistrationConfirmationDto,
@@ -155,6 +158,7 @@ export class AuthController {
   }
   // Повторная отправка кода подтверждения email
   @Post('/registration-email-resending')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(
     @Body() registrationEmailDto: RegistrationEmailDto,
@@ -170,6 +174,7 @@ export class AuthController {
   }
   // Восстановление пароля с помощью подтверждения по электронной почте.
   @Post('/password-recovery')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(
     @Body() registrationEmailDto: RegistrationEmailDto,
@@ -185,6 +190,7 @@ export class AuthController {
   }
   // Подтверждение восстановление пароля
   @Post('/new-password')
+  @UseGuards(AuthCountRequests)
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(
     @Body() confirmPasswordDto: ConfirmPasswordDto,

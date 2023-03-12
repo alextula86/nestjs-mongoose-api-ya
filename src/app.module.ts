@@ -10,6 +10,8 @@ import { Blog, BlogSchema } from './blog/schemas';
 import { Post, PostSchema } from './post/schemas';
 import { Comment, CommentSchema } from './comment/schemas';
 import { Device, DeviceSchema } from './device/schemas';
+import { Session, SessionSchema } from './session/schemas';
+
 import { AuthController } from './auth/auth.controller';
 import { UserController } from './user/user.controller';
 import { BlogController } from './blog/blog.controller';
@@ -54,6 +56,7 @@ import { EmailManager } from './managers';
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
+    MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     MailerModule.forRoot({
       transport: {
         service: 'gmail',
