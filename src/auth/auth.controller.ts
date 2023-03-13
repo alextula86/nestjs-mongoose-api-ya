@@ -105,7 +105,7 @@ export class AuthController {
   // Получить refresh токен
   @Post('refresh-token')
   @UseGuards(AuthGuardRefreshToken)
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   async refreshToken(
     @Req() request: Request & { userId: string; deviceId: string },
     @Res({ passthrough: true }) response: Response,
