@@ -68,22 +68,26 @@ export class AuthGuardRefreshToken implements CanActivate {
     const request: Request & { userId: string; deviceId: string } = context
       .switchToHttp()
       .getRequest();
-    const refreshToken = request.cookies?.refreshToken;
 
-    if (!refreshToken) {
+    if (!request.cookies || !request.cookies.refreshToken) {
       throw new UnauthorizedException();
     }
 
-    const result = await jwtService.getRefreshTokenUserIdAndDeviceId(
-      refreshToken,
-    );
+    const refreshTokenResponse =
+      await jwtService.getRefreshTokenUserIdAndDeviceId(
+        request.cookies.refreshToken,
+      );
 
-    if (!result.userId || !result.deviceId) {
+    if (
+      !refreshTokenResponse ||
+      !refreshTokenResponse.userId ||
+      !refreshTokenResponse.deviceId
+    ) {
       throw new UnauthorizedException();
     }
 
-    request.userId = result.userId;
-    request.deviceId = result.deviceId;
+    request.userId = refreshTokenResponse.userId;
+    request.deviceId = refreshTokenResponse.deviceId;
 
     return true;
   }

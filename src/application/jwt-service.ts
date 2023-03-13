@@ -33,7 +33,7 @@ export const jwtService = {
         deviceId: result.deviceId,
       };
     } catch (error) {
-      console.log(error);
+      console.log('getRefreshTokenUserIdAndDeviceId error', error);
       return null;
     }
   },
