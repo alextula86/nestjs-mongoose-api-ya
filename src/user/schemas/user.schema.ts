@@ -50,7 +50,6 @@ export class User {
 
   // Обновление refresh токена пользователя
   updateRefreshToken(refreshToken: string) {
-    if (!refreshToken) throw new Error('Bad refreshToken value!');
     this.refreshToken = refreshToken;
   }
   // Проверяем можно ли подтвердить аккаунт
