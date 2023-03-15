@@ -110,6 +110,8 @@ export class AuthController {
     @Req() request: Request & { userId: string; deviceId: string },
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthAccessTokenModel> {
+    console.log('request.userId', request.userId);
+    console.log('request.deviceId', request.deviceId);
     const authUserTokens = await this.authService.refreshToken(
       request.userId,
       request.deviceId,

@@ -140,7 +140,6 @@ export class PostService {
       blogId: foundBlog.id,
       blogName: foundBlog.name,
     });
-    console.log('madePost', madePost);
     // Сохраняем пост в базе
     const createdPost = await this.postRepository.save(madePost);
     // Ищем новый пост в базе

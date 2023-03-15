@@ -11,6 +11,7 @@ import { Post, PostSchema } from './post/schemas';
 import { Comment, CommentSchema } from './comment/schemas';
 import { Device, DeviceSchema } from './device/schemas';
 import { Session, SessionSchema } from './session/schemas';
+import { LikeStatus, LikeStatusSchema } from './likeStatus/schemas';
 
 import { AuthController } from './auth/auth.controller';
 import { UserController } from './user/user.controller';
@@ -27,6 +28,7 @@ import { PostService } from './post/post.service';
 import { CommentService } from './comment/comment.service';
 import { DeviceService } from './device/device.service';
 import { SessionService } from './session/session.service';
+import { LikeStatusService } from './likeStatus/likeStatus.service';
 
 import { UserRepository } from './user/user.repository';
 import { BlogRepository } from './blog/blog.repository';
@@ -34,6 +36,7 @@ import { PostRepository } from './post/post.repository';
 import { CommentRepository } from './comment/comment.repository';
 import { DeviceRepository } from './device/device.repository';
 import { SessionRepository } from './session/session.repository';
+import { LikeStatusRepository } from './likeStatus/likeStatus.repository';
 
 import { UserQueryRepository } from './user/user.query.repository';
 import { BlogQueryRepository } from './blog/blog.query.repository';
@@ -57,6 +60,9 @@ import { EmailManager } from './managers';
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
+    MongooseModule.forFeature([
+      { name: LikeStatus.name, schema: LikeStatusSchema },
+    ]),
     MailerModule.forRoot({
       transport: {
         service: 'gmail',
@@ -101,6 +107,8 @@ import { EmailManager } from './managers';
     DeviceQueryRepository,
     SessionService,
     SessionRepository,
+    LikeStatusService,
+    LikeStatusRepository,
     EmailManager,
     EmailAdapter,
   ],
@@ -119,6 +127,8 @@ import { EmailManager } from './managers';
     DeviceQueryRepository,
     SessionService,
     SessionRepository,
+    LikeStatusService,
+    LikeStatusRepository,
   ],
 })
 export class AppModule {}

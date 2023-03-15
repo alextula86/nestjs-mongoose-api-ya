@@ -45,6 +45,23 @@ export class AuthGuardBearer implements CanActivate {
       .getRequest();
     const authorization = request.headers.authorization;
 
+    if (request.method === 'GET') {
+      if (!authorization) {
+        return true;
+      }
+
+      const [authType, authToken] = authorization.split(' ');
+      const userId = await jwtService.getUserIdByAccessToken(authToken);
+
+      if (authType !== 'Bearer' || !userId) {
+        return true;
+      }
+
+      request.userId = userId;
+
+      return true;
+    }
+
     if (!authorization) {
       throw new UnauthorizedException();
     }

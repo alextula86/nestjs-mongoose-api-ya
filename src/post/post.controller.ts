@@ -1,31 +1,45 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuardBasic } from '../auth.guard';
-import { ResponseViewModelDetail } from '../types';
+import { AuthGuardBasic, AuthGuardBearer } from '../auth.guard';
+import { LikeStatuses, ResponseViewModelDetail } from '../types';
+
 import { PostQueryRepository } from './post.query.repository';
 import { PostService } from './post.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { PostViewModel, QueryPostModel } from './types';
+
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+import { CommentService } from '../comment/comment.service';
+import { CreateCommentDto } from '../comment/dto';
+import { CommentViewModel, QueryCommentModel } from '../comment/types';
+
+import { LikeStatusService } from '../likeStatus/likeStatus.service';
 
 @Controller('api/posts')
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly commentService: CommentService,
+    private readonly commentQueryRepository: CommentQueryRepository,
+    private readonly likeStatusService: LikeStatusService,
   ) {}
-
   @Get()
   @HttpCode(HttpStatus.OK)
   // Получение списка постов
@@ -96,18 +110,24 @@ export class PostController {
   async updatePost(
     @Param('postId') postId: string,
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<void> {
     // Обновляем пост
     const { statusCode, statusMessage } = await this.postService.updatePost(
       postId,
       updatePostDto,
     );
-    // Если при обновлении поста возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.NO_CONTENT) {
-      throw new HttpException(statusMessage, statusCode);
+
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException(statusMessage);
     }
 
-    return true;
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException(statusMessage);
+    }
+
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
   }
   // Удаление поста
   @Delete(':postId')
@@ -122,5 +142,77 @@ export class PostController {
     }
     // Иначе возвращаем true
     return isPostDeleted;
+  }
+  // Получение списка комментариев по идентификатору поста
+  @Get(':postId/comments')
+  @UseGuards(AuthGuardBearer)
+  @HttpCode(HttpStatus.OK)
+  // Получение списка постов конкретного блогера
+  async findCommentsByPostId(
+    @Req() request: Request & { userId: string },
+    @Param('postId') postId: string,
+    @Query()
+    { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
+  ): Promise<ResponseViewModelDetail<CommentViewModel>> {
+    // Ищем пост по идентификатору
+    const foundPost = await this.postQueryRepository.findPostById(postId);
+    // Если блог не найден возвращаем ошибку
+    if (!foundPost) {
+      throw new NotFoundException();
+    }
+    // Ищем все лайк статусы пользователя комментарий
+    const likeStatusesOfUserComment = request.userId
+      ? await this.likeStatusService.getLikeStatusesOfUserComment(
+          request.userId,
+        )
+      : [];
+
+    const commentsByPostId =
+      await this.commentQueryRepository.findCommentsByPostId(
+        postId,
+        likeStatusesOfUserComment,
+        {
+          pageNumber,
+          pageSize,
+          sortBy,
+          sortDirection,
+        },
+      );
+
+    return commentsByPostId;
+  }
+  // Создание комментария
+  @Post(':postId/comments')
+  @UseGuards(AuthGuardBearer)
+  @HttpCode(HttpStatus.CREATED)
+  async createCommentsByPostId(
+    @Req() request: Request & { userId: string },
+    @Param('postId') postId: string,
+    @Body() createCommentDto: CreateCommentDto,
+  ): Promise<CommentViewModel> {
+    // Создаем пост
+    const { commentId, statusCode, statusMessage } =
+      await this.commentService.createCommentsByPostId(
+        request.userId,
+        postId,
+        createCommentDto,
+      );
+    // Если пост для которого создается комментарий не найден
+    // Возвращаем статус ошибки 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException(statusMessage);
+    }
+    // Если при создании комментария возникли ошибки возращаем статус ошибки 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+
+    // Порлучаем созданный комментарий в формате ответа пользователю
+    const foundComment = await this.commentQueryRepository.findCommentById(
+      commentId,
+      LikeStatuses.NONE,
+    );
+    // Возвращаем созданный комментарий
+    return foundComment;
   }
 }
