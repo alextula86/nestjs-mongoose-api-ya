@@ -174,11 +174,18 @@ export class PostQueryRepository {
       return null;
     }
 
-    const foundLikeStatus = await this.LikeStatusModel.findOne({
+    const foundLikeStatusByUserId = await this.LikeStatusModel.findOne({
       parentId: foundPost.id,
       userId,
-      pageType: PageType.COMMENT,
+      pageType: PageType.POST,
     });
+
+    const newestLikes = await this.LikeStatusModel.find({
+      parentId: foundPost.id,
+      pageType: PageType.POST,
+    })
+      .sort({ createdAt: -1 })
+      .limit(3);
 
     return {
       id: foundPost.id,
@@ -191,10 +198,10 @@ export class PostQueryRepository {
       extendedLikesInfo: {
         likesCount: foundPost.likesCount,
         dislikesCount: foundPost.dislikesCount,
-        myStatus: foundLikeStatus
-          ? foundLikeStatus.likeStatus
+        myStatus: foundLikeStatusByUserId
+          ? foundLikeStatusByUserId.likeStatus
           : LikeStatuses.NONE,
-        newestLikes: foundPost.newestLikes.map((i) => ({
+        newestLikes: newestLikes.map((i) => ({
           addedAt: i.createdAt,
           userId: i.userId,
           login: i.userLogin,

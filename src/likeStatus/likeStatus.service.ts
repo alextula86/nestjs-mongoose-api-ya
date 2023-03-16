@@ -245,6 +245,12 @@ export class LikeStatusService {
       // Сохраняем пост в базе
       await this.postRepository.save(foundPost);
       // Возвращаем статус 204
+
+      const alllikes = await this.likeStatusRepository.findLikes();
+      const foundPost1 = await this.postRepository.findPostById(postId);
+      console.log('юзер НЕ ставил лайк');
+      console.log('alllikes', alllikes);
+      console.log('foundPost1', foundPost1);
       return {
         statusCode: HttpStatus.NO_CONTENT,
         statusMessage: [
@@ -285,6 +291,11 @@ export class LikeStatusService {
     foundPost.updateLikeStatusesCount({ likesCount, dislikesCount });
     // Сохраняем комментарий в базе
     await this.postRepository.save(foundPost);
+    const alllikes = await this.likeStatusRepository.findLikes();
+    const foundPost1 = await this.postRepository.findPostById(postId);
+    console.log('юзер УЖЕ ставил лайк');
+    console.log('alllikes', alllikes);
+    console.log('foundPost1', foundPost1);
     // Возвращаем статус 204
     return {
       statusCode: HttpStatus.NO_CONTENT,

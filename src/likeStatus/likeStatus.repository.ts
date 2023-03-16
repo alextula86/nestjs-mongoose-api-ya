@@ -28,6 +28,12 @@ export class LikeStatusRepository {
 
     return madeLikeStatus;
   }
+  // Поиск всех лайков
+  async findLikes(): Promise<LikeStatusDocument[]> {
+    const foundLikeStatus = await this.LikeStatusModel.find();
+
+    return foundLikeStatus;
+  }
   // Поиск лайк статус пользователя
   async findLikeStatusOfUser(
     userId: string,
