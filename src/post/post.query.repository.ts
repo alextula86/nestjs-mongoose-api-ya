@@ -60,6 +60,7 @@ export class PostQueryRepository {
 
         const newestLikes = await this.LikeStatusModel.find({
           parentId: post.id,
+          likeStatus: LikeStatuses.LIKE,
           pageType: PageType.POST,
         })
           .sort({ createdAt: -1 })
@@ -140,6 +141,7 @@ export class PostQueryRepository {
 
         const newestLikes = await this.LikeStatusModel.find({
           parentId: post.id,
+          likeStatus: LikeStatuses.LIKE,
           pageType: PageType.POST,
         })
           .sort({ createdAt: -1 })
@@ -196,6 +198,7 @@ export class PostQueryRepository {
 
     const newestLikes = await this.LikeStatusModel.find({
       parentId: foundPost.id,
+      likeStatus: LikeStatuses.LIKE,
       pageType: PageType.POST,
     })
       .sort({ createdAt: -1 })
