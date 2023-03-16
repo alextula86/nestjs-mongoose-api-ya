@@ -22,7 +22,12 @@ export class CommentQueryRepository {
   async findCommentsByPostId(
     postId: string,
     userId: string,
-    { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
+    {
+      pageNumber,
+      pageSize,
+      sortBy = 'createdAt',
+      sortDirection = SortDirection.DESC,
+    }: QueryCommentModel,
   ): Promise<ResponseViewModelDetail<CommentViewModel>> {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;

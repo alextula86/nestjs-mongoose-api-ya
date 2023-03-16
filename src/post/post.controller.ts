@@ -42,6 +42,7 @@ export class PostController {
     private readonly likeStatusService: LikeStatusService,
   ) {}
   @Get()
+  @UseGuards(AuthGuardBearer)
   @HttpCode(HttpStatus.OK)
   // Получение списка постов
   async findAllPosts(

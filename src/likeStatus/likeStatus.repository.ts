@@ -85,7 +85,7 @@ export class LikeStatusRepository {
       pageType,
     });
 
-    return deletedCount === 1;
+    return deletedCount > 0;
   }
   // Удаление коллекции
   async deleteAll(): Promise<boolean> {
