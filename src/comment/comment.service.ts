@@ -4,10 +4,11 @@ import { validateOrRejectModel } from '../validate';
 import { CommentRepository } from './comment.repository';
 import { UserRepository } from '../user/user.repository';
 import { PostRepository } from '../post/post.repository';
+import { LikeStatusRepository } from '../likeStatus/likeStatus.repository';
+
 import { CommentDocument } from './schemas';
 import { CreateCommentDto, UpdateCommentDto } from './dto';
-import { LikeStatusRepository } from '../likeStatus/likeStatus.repository';
-import { PageType } from 'types';
+import { PageType } from '../types';
 
 @Injectable()
 export class CommentService {
@@ -17,7 +18,7 @@ export class CommentService {
     private readonly postRepository: PostRepository,
     private readonly likeStatusRepository: LikeStatusRepository,
   ) {}
-  // Создать комментарий
+  // Поис комментария
   async findCommentById(commentId: string): Promise<CommentDocument | null> {
     const foundCommentById = await this.commentRepository.findCommentById(
       commentId,
@@ -161,13 +162,13 @@ export class CommentService {
     const isDeleteCommentById = await this.commentRepository.deleteCommentById(
       commentId,
     );
-    console.log('isDeleteCommentById', isDeleteCommentById);
+
     const isDeleteLikeStatusByCommentId =
       await this.likeStatusRepository.deleteLikeStatusByParentId(
         commentId,
         PageType.COMMENT,
       );
-    console.log('isDeleteLikeStatusByCommentId', isDeleteLikeStatusByCommentId);
+
     return isDeleteCommentById && isDeleteLikeStatusByCommentId;
   }
 }

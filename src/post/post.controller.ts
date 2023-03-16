@@ -30,6 +30,7 @@ import { CreateCommentDto } from '../comment/dto';
 import { CommentViewModel, QueryCommentModel } from '../comment/types';
 
 import { LikeStatusService } from '../likeStatus/likeStatus.service';
+import { AddLikeStatusDTO } from '../likeStatus/dto';
 
 @Controller('api/posts')
 export class PostController {
@@ -44,6 +45,7 @@ export class PostController {
   @HttpCode(HttpStatus.OK)
   // Получение списка постов
   async findAllPosts(
+    @Req() request: Request & { userId: string },
     @Query()
     {
       searchNameTerm,
@@ -53,8 +55,8 @@ export class PostController {
       sortDirection,
     }: QueryPostModel,
   ): Promise<ResponseViewModelDetail<PostViewModel>> {
-    const userId = '';
     const allPosts = await this.postQueryRepository.findAllPosts(
+      request.userId,
       {
         searchNameTerm,
         pageNumber,
@@ -62,24 +64,26 @@ export class PostController {
         sortBy,
         sortDirection,
       },
-      userId,
     );
 
     return allPosts;
   }
   // Получение конкретного поста по его идентификатору
   @Get(':postId')
+  @UseGuards(AuthGuardBearer)
   @HttpCode(HttpStatus.OK)
-  async findPostById(@Param('postId') postId: string): Promise<PostViewModel> {
-    const userId = '';
+  async findPostById(
+    @Req() request: Request & { userId: string },
+    @Param('postId') postId: string,
+  ): Promise<PostViewModel> {
     // Получаем конкретный пост по его идентификатору
     const foundPost = await this.postQueryRepository.findPostById(
       postId,
-      userId,
+      request.userId,
     );
-    // Если пост не найден возвращаем ошибку
+    // Если пост не найден возвращаем ошибку 404
     if (!foundPost) {
-      throw new HttpException('Post is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Возвращаем пост в формате ответа пользователю
     return foundPost;
@@ -99,7 +103,10 @@ export class PostController {
       throw new HttpException(statusMessage, statusCode);
     }
     // Порлучаем созданный пост в формате ответа пользователю
-    const foundPost = await this.postQueryRepository.findPostById(postId);
+    const foundPost = await this.postQueryRepository.findPostById(
+      postId,
+      LikeStatuses.NONE,
+    );
     // Возвращаем созданный пост
     return foundPost;
   }
@@ -155,22 +162,16 @@ export class PostController {
     { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
   ): Promise<ResponseViewModelDetail<CommentViewModel>> {
     // Ищем пост по идентификатору
-    const foundPost = await this.postQueryRepository.findPostById(postId);
+    const foundPost = await this.postService.findPostById(postId);
     // Если блог не найден возвращаем ошибку
     if (!foundPost) {
       throw new NotFoundException();
     }
-    // Ищем все лайк статусы пользователя комментарий
-    const likeStatusesOfUserComment = request.userId
-      ? await this.likeStatusService.getLikeStatusesOfUserComment(
-          request.userId,
-        )
-      : [];
 
     const commentsByPostId =
       await this.commentQueryRepository.findCommentsByPostId(
         postId,
-        likeStatusesOfUserComment,
+        request.userId,
         {
           pageNumber,
           pageSize,
@@ -214,5 +215,33 @@ export class PostController {
     );
     // Возвращаем созданный комментарий
     return foundComment;
+  }
+  // Обновление лайк статуса поста
+  @Put(':postId/like-status')
+  @UseGuards(AuthGuardBearer)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateCommentLikeStatus(
+    @Req() request: Request & { userId: string },
+    @Param('postId') postId: string,
+    @Body() addLikeStatusDTO: AddLikeStatusDTO,
+  ): Promise<void> {
+    // Обновляем лайк статус поста
+    const { statusCode, statusMessage } =
+      await this.likeStatusService.updateLikeStatusOfPost(
+        request.userId,
+        postId,
+        addLikeStatusDTO,
+      );
+
+    // Если пост не найден, возращаем статус ошибки 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+
+    // Если при обновлении лайк статуса поста возникли ошибки
+    // Возращаем статус ошибки 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
   }
 }

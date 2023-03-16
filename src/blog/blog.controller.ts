@@ -10,9 +10,10 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuardBasic } from '../auth.guard';
+import { AuthGuardBasic, AuthGuardBearer } from '../auth.guard';
 import { BlogService } from './blog.service';
 import { PostService } from '../post/post.service';
 import { BlogQueryRepository } from './blog.query.repository';
@@ -123,9 +124,11 @@ export class BlogController {
   }
   // Получение списка постов по идентификатору блогера
   @Get(':blogId/posts')
+  @UseGuards(AuthGuardBearer)
   @HttpCode(HttpStatus.OK)
   // Получение списка постов конкретного блогера
   async findPostsByBlogId(
+    @Req() request: Request & { userId: string },
     @Param('blogId') blogId: string,
     @Query()
     {
@@ -145,6 +148,7 @@ export class BlogController {
 
     const postsByBlogId = await this.postQueryRepository.findPostsByBlogId(
       blogId,
+      request.userId,
       {
         searchNameTerm,
         pageNumber,
@@ -172,7 +176,7 @@ export class BlogController {
       throw new HttpException(statusMessage, statusCode);
     }
     // Порлучаем созданный пост в формате ответа пользователю
-    const foundPost = await this.postQueryRepository.findPostById(postId);
+    const foundPost = await this.postQueryRepository.findPostById(postId, null);
     // Возвращаем созданный пост
     return foundPost;
   }

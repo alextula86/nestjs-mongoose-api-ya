@@ -36,19 +36,14 @@ export class CommentController {
     @Req() request: Request & { userId: string },
     @Param('commentId') commentId: string,
   ): Promise<CommentViewModel> {
-    const likeStatusUser =
-      await this.likeStatusService.getLikeStatusOfUserComment(
-        request.userId,
-        commentId,
-      );
     // Получаем комментарий по идентификатору
     const foundComment = await this.commentQueryRepository.findCommentById(
       commentId,
-      likeStatusUser,
+      request.userId,
     );
-    // Если комментарий не найден возвращаем ошибку
+    // Если комментарий не найден возвращаем ошибку 404
     if (!foundComment) {
-      throw new HttpException('Comment is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Возвращаем комментарий в формате ответа пользователю
     return foundComment;
@@ -109,12 +104,13 @@ export class CommentController {
         addLikeStatusDTO,
       );
 
-    // Если при обновлении комментария возникли ошибки возращаем статус ошибки 404
+    // Если комментарий не найден, возращаем статус ошибки 404
     if (statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException();
     }
 
-    // Если при обновлении комментария возникли ошибки возращаем статус ошибки 400
+    // Если при обновлении лайк статуса комментария возникли ошибки
+    // Возращаем статус ошибки 400
     if (statusCode === HttpStatus.BAD_REQUEST) {
       throw new BadRequestException(statusMessage);
     }

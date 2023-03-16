@@ -1,20 +1,31 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { BlogRepository } from '../blog/blog.repository';
-import { PostRepository } from './post.repository';
 import { validateOrRejectModel } from '../validate';
+import { PostRepository } from './post.repository';
+import { LikeStatusRepository } from '../likeStatus/likeStatus.repository';
+import { BlogRepository } from '../blog/blog.repository';
+
 import {
   CreatePostBaseDto,
   CreatePostDto,
   UpdatePostDto,
 } from './dto/post.dto';
+import { PageType } from '../types';
+import { PostDocument } from './schemas';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly blogRepository: BlogRepository,
+    private readonly likeStatusRepository: LikeStatusRepository,
   ) {}
+  // Поис комментария
+  async findPostById(postId: string): Promise<PostDocument | null> {
+    const foundPostById = await this.postRepository.findPostById(postId);
+
+    return foundPostById;
+  }
   // Создание поста
   async createPost(createPostDto: CreatePostDto): Promise<{
     postId: string;
@@ -108,7 +119,13 @@ export class PostService {
   async deletePostById(postId: string): Promise<boolean> {
     const isDeletePostById = await this.postRepository.deletePostById(postId);
 
-    return isDeletePostById;
+    const isDeleteLikeStatusByPostId =
+      await this.likeStatusRepository.deleteLikeStatusByParentId(
+        postId,
+        PageType.POST,
+      );
+
+    return isDeletePostById && isDeleteLikeStatusByPostId;
   }
   // Создание поста по идентификатору блогера
   async createPostsByBlogId(

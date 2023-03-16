@@ -1,54 +1,45 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { validateOrRejectModel } from '../validate';
+
+import { LikeStatusRepository } from './likeStatus.repository';
+import { PostRepository } from '../post/post.repository';
 import { CommentRepository } from '../comment/comment.repository';
 import { UserRepository } from '../user/user.repository';
-import { LikeStatusRepository } from './likeStatus.repository';
 
 import { AddLikeStatusDTO } from './dto/likeStatus.dto';
 import { LikeStatuses, PageType } from '../types';
-import { LikeStatusDocument } from './schemas';
 
 @Injectable()
 export class LikeStatusService {
   constructor(
+    private readonly likeStatusRepository: LikeStatusRepository,
+    private readonly postRepository: PostRepository,
     private readonly commentRepository: CommentRepository,
     private readonly userRepository: UserRepository,
-    private readonly likeStatusRepository: LikeStatusRepository,
   ) {}
   // Получить лайк статус пользователя
-  async getLikeStatusOfUserComment(
+  async getLikeStatusOfUser(
     userId: string | null,
-    commentId: string,
+    parentId: string,
+    pageType: PageType,
   ): Promise<LikeStatuses> {
     if (!userId) {
       return LikeStatuses.NONE;
     }
 
-    const foundLikeStatusOfUserComment =
+    const foundLikeStatusOfUser =
       await this.likeStatusRepository.findLikeStatusOfUser(
         userId,
-        commentId,
-        PageType.COMMENT,
+        parentId,
+        pageType,
       );
 
-    if (!foundLikeStatusOfUserComment) {
+    if (!foundLikeStatusOfUser) {
       return LikeStatuses.NONE;
     }
 
-    return foundLikeStatusOfUserComment.likeStatus;
-  }
-  // Поиск всех лайк статусов комментарий пользователя
-  async getLikeStatusesOfUserComment(
-    userId: string,
-  ): Promise<LikeStatusDocument[]> {
-    const foundLikeStatuses =
-      await this.likeStatusRepository.findLikeStatusesOfUser(
-        userId,
-        PageType.COMMENT,
-      );
-
-    return foundLikeStatuses;
+    return foundLikeStatusOfUser.likeStatus;
   }
   // Обновление лайк статуса коментария
   async updateLikeStatusOfComment(
@@ -149,7 +140,7 @@ export class LikeStatusService {
       };
     }
     // Обновляем лайк статус
-    foundLikeStatusOfUserComment.updateLikeStatus(addLikeStatusDTO.likeStatus);
+    foundLikeStatusOfUserComment.updateLikeStatus(likeStatus);
     // Сохраняем лайкстатус в базе
     await this.likeStatusRepository.save(foundLikeStatusOfUserComment);
     // Находим количество лайков комментария
@@ -168,6 +159,132 @@ export class LikeStatusService {
     foundComment.updateLikeStatusesCount({ likesCount, dislikesCount });
     // Сохраняем комментарий в базе
     await this.commentRepository.save(foundComment);
+    // Возвращаем статус 204
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      statusMessage: [
+        {
+          message: `Like status update`,
+        },
+      ],
+    };
+  }
+  // Обновление лайк статуса поста
+  async updateLikeStatusOfPost(
+    userId: string,
+    postId: string,
+    addLikeStatusDTO: AddLikeStatusDTO,
+  ): Promise<{
+    statusCode: HttpStatus;
+    statusMessage: [{ message: string; field?: string }];
+  }> {
+    await validateOrRejectModel(addLikeStatusDTO, AddLikeStatusDTO);
+
+    // Ищем пост
+    const foundPost = await this.postRepository.findPostById(postId);
+    // Если пост не найден, возвращаем ошибку 404
+    if (isEmpty(foundPost)) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        statusMessage: [
+          {
+            message: `Comment with id ${postId} was not found`,
+            field: 'postId',
+          },
+        ],
+      };
+    }
+    // Ищем пользователя
+    const foundUser = await this.userRepository.findUserById(userId);
+    // Если пользователь не найден, возвращаем ошибку 400
+    if (isEmpty(foundUser)) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `User with id ${userId} was not found`,
+            field: 'userId',
+          },
+        ],
+      };
+    }
+    // Получаем лайк статус из DTO
+    const { likeStatus } = addLikeStatusDTO;
+    // Находим лайк статус поста пользователя
+    const foundLikeStatusOfUserPost =
+      await this.likeStatusRepository.findLikeStatusOfUser(
+        userId,
+        postId,
+        PageType.POST,
+      );
+    // Если пользователь не лайкал пост, то создаем инстанс лайк статуса и добавляем его для поста
+    if (!foundLikeStatusOfUserPost) {
+      const madeLikeStatus = await this.likeStatusRepository.createLikeStatus({
+        parentId: postId,
+        userId: foundUser.id,
+        userLogin: foundUser.accountData.login,
+        likeStatus,
+        pageType: PageType.POST,
+      });
+      // Сохраняем созданный лайкстатус в базе
+      await this.likeStatusRepository.save(madeLikeStatus);
+      // Находим количество лайков поста
+      const likesCount = await this.likeStatusRepository.getLikeStatusCount(
+        postId,
+        PageType.COMMENT,
+        LikeStatuses.LIKE,
+      );
+      // Находим количество дизлайков поста
+      const dislikesCount = await this.likeStatusRepository.getLikeStatusCount(
+        postId,
+        PageType.COMMENT,
+        LikeStatuses.DISLIKE,
+      );
+      // Обновляем количесво лайков и дизлайков поста
+      foundPost.updateLikeStatusesCount({ likesCount, dislikesCount });
+      // Сохраняем пост в базе
+      await this.postRepository.save(foundPost);
+      // Возвращаем статус 204
+      return {
+        statusCode: HttpStatus.NO_CONTENT,
+        statusMessage: [
+          {
+            message: `Like status update`,
+          },
+        ],
+      };
+    }
+    // Если лайк статус пользователя равен переданому лайк статусу не производим обновление лайк статуса
+    if (foundLikeStatusOfUserPost.likeStatus === likeStatus) {
+      return {
+        statusCode: HttpStatus.NO_CONTENT,
+        statusMessage: [
+          {
+            message: `Like status update`,
+          },
+        ],
+      };
+    }
+    // Обновляем лайк статус
+    foundLikeStatusOfUserPost.updateLikeStatus(likeStatus);
+    // Сохраняем лайкстатус в базе
+    await this.likeStatusRepository.save(foundLikeStatusOfUserPost);
+    // Находим количество лайков поста
+    const likesCount = await this.likeStatusRepository.getLikeStatusCount(
+      postId,
+      PageType.POST,
+      LikeStatuses.LIKE,
+    );
+    // Находим количество дизлайков поста
+    const dislikesCount = await this.likeStatusRepository.getLikeStatusCount(
+      postId,
+      PageType.POST,
+      LikeStatuses.DISLIKE,
+    );
+    // Обновляем количесво лайков и дизлайков поста
+    foundPost.updateLikeStatusesCount({ likesCount, dislikesCount });
+    // Сохраняем комментарий в базе
+    await this.postRepository.save(foundPost);
     // Возвращаем статус 204
     return {
       statusCode: HttpStatus.NO_CONTENT,
