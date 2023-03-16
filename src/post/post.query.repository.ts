@@ -58,6 +58,13 @@ export class PostQueryRepository {
           pageType: PageType.POST,
         });
 
+        const newestLikes = await this.LikeStatusModel.find({
+          parentId: post.id,
+          pageType: PageType.POST,
+        })
+          .sort({ createdAt: -1 })
+          .limit(3);
+
         return {
           id: post.id,
           title: post.title,
@@ -72,7 +79,7 @@ export class PostQueryRepository {
             myStatus: foundLikeStatus
               ? foundLikeStatus.likeStatus
               : LikeStatuses.NONE,
-            newestLikes: post.newestLikes.map((i) => ({
+            newestLikes: newestLikes.map((i) => ({
               addedAt: i.createdAt,
               userId: i.userId,
               login: i.userLogin,
@@ -131,6 +138,13 @@ export class PostQueryRepository {
           pageType: PageType.POST,
         });
 
+        const newestLikes = await this.LikeStatusModel.find({
+          parentId: post.id,
+          pageType: PageType.POST,
+        })
+          .sort({ createdAt: -1 })
+          .limit(3);
+
         return {
           id: post.id,
           title: post.title,
@@ -145,7 +159,7 @@ export class PostQueryRepository {
             myStatus: foundLikeStatus
               ? foundLikeStatus.likeStatus
               : LikeStatuses.NONE,
-            newestLikes: post.newestLikes.map((i) => ({
+            newestLikes: newestLikes.map((i) => ({
               addedAt: i.createdAt,
               userId: i.userId,
               login: i.userLogin,
