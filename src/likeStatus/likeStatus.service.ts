@@ -231,13 +231,13 @@ export class LikeStatusService {
       // Находим количество лайков поста
       const likesCount = await this.likeStatusRepository.getLikeStatusCount(
         postId,
-        PageType.COMMENT,
+        PageType.POST,
         LikeStatuses.LIKE,
       );
       // Находим количество дизлайков поста
       const dislikesCount = await this.likeStatusRepository.getLikeStatusCount(
         postId,
-        PageType.COMMENT,
+        PageType.POST,
         LikeStatuses.DISLIKE,
       );
       // Обновляем количесво лайков и дизлайков поста
