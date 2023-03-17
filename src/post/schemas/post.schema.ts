@@ -81,7 +81,7 @@ export class Post extends Document {
     required: [true, 'The blogId field is required'],
     trim: true,
     minLength: [1, 'The blogId field must be at least 1, got {VALUE}'],
-    maxLength: [20, 'The blogId field must be no more than 20, got {VALUE}'],
+    maxLength: [50, 'The blogId field must be no more than 50, got {VALUE}'],
   })
   blogId: string;
 

@@ -48,8 +48,8 @@ export class BlogIdDto {
   @MinLength(1, {
     message: 'The blogId field must be at least 1, got $value',
   })
-  @MaxLength(20, {
-    message: 'The blogId field must be no more than 20, got $value',
+  @MaxLength(40, {
+    message: 'The blogId field must be no more than 40, got $value',
   })
   blogId: string;
 }
