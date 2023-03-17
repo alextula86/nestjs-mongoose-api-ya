@@ -150,6 +150,7 @@ export class BlogController {
     if (!foundBlog) {
       throw new NotFoundException();
     }
+    // Получаем пост по идентификатору блогера
     const postsByBlogId = await this.postQueryRepository.findPostsByBlogId(
       blogId,
       request.userId,
