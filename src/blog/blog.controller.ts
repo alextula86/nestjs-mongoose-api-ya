@@ -144,14 +144,12 @@ export class BlogController {
     if (!blogId) {
       throw new NotFoundException();
     }
-
     // Получаем блогера по идентификатору
-    const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
+    const foundBlog = await this.blogService.findBlogById(blogId);
     // Если блогер не найден возвращаем ошибку
     if (!foundBlog) {
       throw new NotFoundException();
     }
-
     const postsByBlogId = await this.postQueryRepository.findPostsByBlogId(
       blogId,
       request.userId,
@@ -175,11 +173,13 @@ export class BlogController {
     @Body() createPostBaseDto: CreatePostBaseDto,
   ): Promise<PostViewModel> {
     // Создаем пост
-    const { postId, statusCode, statusMessage } =
-      await this.postService.createPostsByBlogId(blogId, createPostBaseDto);
-    // Если при создании поста возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.CREATED) {
-      throw new HttpException(statusMessage, statusCode);
+    const { postId, statusCode } = await this.postService.createPostsByBlogId(
+      blogId,
+      createPostBaseDto,
+    );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
     }
     // Порлучаем созданный пост в формате ответа пользователю
     const foundPost = await this.postQueryRepository.findPostById(postId, null);

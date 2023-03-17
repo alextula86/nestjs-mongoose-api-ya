@@ -140,7 +140,7 @@ export class PostService {
     const { title, shortDescription, content } = createPostBaseDto;
     // Ищем блогера, к которому прикреплен пост
     const foundBlog = await this.blogRepository.findBlogById(blogId);
-    // Если блогер не найден, возвращаем ошибку
+    // Если блогер не найден, возвращаем ошибку 404
     if (isEmpty(foundBlog)) {
       return {
         postId: null,
@@ -158,16 +158,6 @@ export class PostService {
     });
     // Сохраняем пост в базе
     const createdPost = await this.postRepository.save(madePost);
-    // Ищем новый пост в базе
-    const foundPost = await this.postRepository.findPostById(createdPost.id);
-    // Если поста нет, т.е. он не сохранился, возвращаем ошибку
-    if (!foundPost) {
-      return {
-        postId: null,
-        statusCode: HttpStatus.BAD_REQUEST,
-        statusMessage: `Post creation error`,
-      };
-    }
     // Возвращаем идентификатор созданного поста и статус CREATED
     return {
       postId: createdPost.id,
