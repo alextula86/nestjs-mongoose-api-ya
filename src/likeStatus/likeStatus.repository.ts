@@ -79,13 +79,16 @@ export class LikeStatusRepository {
     return count;
   }
   // Удаление лайка по идентификатору комментария или поста
-  async deleteLikeStatusByParentId(parentId, pageType): Promise<boolean> {
-    const { deletedCount } = await this.LikeStatusModel.deleteMany({
+  async deleteLikeStatusesByParentId(
+    parentId: string,
+    pageType: PageType,
+  ): Promise<boolean> {
+    await this.LikeStatusModel.deleteMany({
       parentId,
       pageType,
     });
 
-    return deletedCount > 0;
+    return true;
   }
   // Удаление коллекции
   async deleteAll(): Promise<boolean> {

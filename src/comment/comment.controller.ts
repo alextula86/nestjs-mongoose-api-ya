@@ -83,7 +83,7 @@ export class CommentController {
     );
     // Если при удалении комментария вернулись ошибка возвращаем ее
     if (!isCommentDeleted) {
-      throw new HttpException('Comment is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Иначе возвращаем true
     return isCommentDeleted;

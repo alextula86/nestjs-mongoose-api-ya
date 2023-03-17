@@ -142,11 +142,11 @@ export class PostController {
   @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostById(@Param('postId') postId: string): Promise<boolean> {
-    // Удаляем пост
+    // Удаляем пост и связанные с ним комментарии
     const isPostDeleted = await this.postService.deletePostById(postId);
     // Если при удалении поста вернулись ошибка возвращаем ее
     if (!isPostDeleted) {
-      throw new HttpException('Post is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Иначе возвращаем true
     return isPostDeleted;

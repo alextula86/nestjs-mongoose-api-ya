@@ -119,13 +119,12 @@ export class PostService {
   async deletePostById(postId: string): Promise<boolean> {
     const isDeletePostById = await this.postRepository.deletePostById(postId);
 
-    const isDeleteLikeStatusByPostId =
-      await this.likeStatusRepository.deleteLikeStatusByParentId(
-        postId,
-        PageType.POST,
-      );
+    await this.likeStatusRepository.deleteLikeStatusesByParentId(
+      postId,
+      PageType.POST,
+    );
 
-    return isDeletePostById && isDeleteLikeStatusByPostId;
+    return isDeletePostById;
   }
   // Создание поста по идентификатору блогера
   async createPostsByBlogId(

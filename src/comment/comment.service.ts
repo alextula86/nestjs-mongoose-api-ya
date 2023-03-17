@@ -163,12 +163,11 @@ export class CommentService {
       commentId,
     );
 
-    const isDeleteLikeStatusByCommentId =
-      await this.likeStatusRepository.deleteLikeStatusByParentId(
-        commentId,
-        PageType.COMMENT,
-      );
+    await this.likeStatusRepository.deleteLikeStatusesByParentId(
+      commentId,
+      PageType.COMMENT,
+    );
 
-    return isDeleteCommentById && isDeleteLikeStatusByCommentId;
+    return isDeleteCommentById;
   }
 }

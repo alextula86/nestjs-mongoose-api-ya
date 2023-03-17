@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -139,11 +140,16 @@ export class BlogController {
       sortDirection,
     }: QueryPostModel,
   ): Promise<ResponseViewModelDetail<PostViewModel>> {
-    // Получаем блдогера по идентификатору
+    // Если идентификатор блогера не передан возвращаем ошибку 404
+    if (!blogId) {
+      throw new NotFoundException();
+    }
+
+    // Получаем блогера по идентификатору
     const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
-    // Если блог не найден возвращаем ошибку
+    // Если блогер не найден возвращаем ошибку
     if (!foundBlog) {
-      throw new HttpException('Blog is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
 
     const postsByBlogId = await this.postQueryRepository.findPostsByBlogId(
