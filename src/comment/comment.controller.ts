@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpException,
@@ -75,18 +76,28 @@ export class CommentController {
   @Delete(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCommentById(
+    @Req() request: Request & { userId: string },
     @Param('commentId') commentId: string,
   ): Promise<boolean> {
     // Удаляем комментарий
-    const isCommentDeleted = await this.commentService.deleteCommentById(
+    const { statusCode } = await this.commentService.deleteCommentById(
       commentId,
+      request.userId,
     );
-    // Если при удалении комментария вернулись ошибка возвращаем ее
-    if (!isCommentDeleted) {
+
+    // Если комментарий не найден, возвращаем ошиюку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException();
     }
-    // Иначе возвращаем true
-    return isCommentDeleted;
+
+    // Если удаляется комментарий, который не принадлежит пользователю
+    // Возвращаем 403
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+
+    // Иначе возвращаем статус 204
+    return true;
   }
   // Обновление лайк статуса комментария
   @Put(':commentId/like-status')

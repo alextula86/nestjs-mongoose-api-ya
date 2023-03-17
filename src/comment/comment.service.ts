@@ -158,16 +158,30 @@ export class CommentService {
     };
   }
   // Удаление комментария
-  async deleteCommentById(commentId: string): Promise<boolean> {
-    const isDeleteCommentById = await this.commentRepository.deleteCommentById(
+  async deleteCommentById(
+    commentId: string,
+    userId: string,
+  ): Promise<{ statusCode: HttpStatus }> {
+    // Ищем комментарий
+    const foundComment = await this.commentRepository.findCommentById(
       commentId,
     );
+    // Если комментарий не найден, возвращаем ошибку 404
+    if (isEmpty(foundComment)) {
+      return { statusCode: HttpStatus.NOT_FOUND };
+    }
+
+    if (foundComment.userId !== userId) {
+      return { statusCode: HttpStatus.FORBIDDEN };
+    }
+
+    await this.commentRepository.deleteCommentById(commentId);
 
     await this.likeStatusRepository.deleteLikeStatusesByParentId(
       commentId,
       PageType.COMMENT,
     );
 
-    return isDeleteCommentById;
+    return { statusCode: HttpStatus.NO_CONTENT };
   }
 }
