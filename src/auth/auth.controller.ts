@@ -88,12 +88,14 @@ export class AuthController {
   @UseGuards(AuthGuardRefreshToken)
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
-    @Req() request: Request & { userId: string; deviceId: string },
+    @Req()
+    request: Request & { userId: string; deviceId: string; deviceIat: string },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const { statusCode } = await this.authService.logout(
       request.userId,
       request.deviceId,
+      request.deviceIat,
     );
     // Если при logout возникли ошибки возращаем статус ошибки 401
     if (statusCode !== HttpStatus.NO_CONTENT) {

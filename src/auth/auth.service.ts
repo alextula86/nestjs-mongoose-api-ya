@@ -83,6 +83,7 @@ export class AuthService {
   async logout(
     userId: string,
     deviceId: string,
+    deviceIat: string,
   ): Promise<{ statusCode: HttpStatus; statusMessage: string }> {
     // Ищем пользователя по его идентификатору
     const user = await this.userRepository.findUserById(userId);
@@ -91,10 +92,18 @@ export class AuthService {
     // Если пользователь не найден, то вернем null для возрвата 401 ошибки
     if (!user || !device) {
       return {
-        statusCode: HttpStatus.FORBIDDEN,
-        statusMessage: 'FORBIDDEN',
+        statusCode: HttpStatus.UNAUTHORIZED,
+        statusMessage: 'UNAUTHORIZED',
       };
     }
+
+    if (deviceIat !== device.lastActiveDate) {
+      return {
+        statusCode: HttpStatus.UNAUTHORIZED,
+        statusMessage: 'UNAUTHORIZED',
+      };
+    }
+
     // Обновляем refreshToken пользователя
     user.updateRefreshToken('');
     // Сохраняем пользователя в базе
