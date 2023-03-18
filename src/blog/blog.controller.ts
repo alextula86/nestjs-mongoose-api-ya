@@ -20,7 +20,7 @@ import { PostService } from '../post/post.service';
 import { BlogQueryRepository } from './blog.query.repository';
 import { PostQueryRepository } from '../post/post.query.repository';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
-import { BlogIdDto, CreatePostBaseDto } from '../post/dto/post.dto';
+import { CreatePostBaseDto } from '../post/dto/post.dto';
 import { QueryBlogModel, BlogViewModel } from './types';
 import { PostViewModel, QueryPostModel } from '../post/types';
 import { ResponseViewModelDetail } from '../types';
