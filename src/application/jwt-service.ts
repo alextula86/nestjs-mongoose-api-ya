@@ -4,7 +4,7 @@ import { settings } from '../settings';
 export const jwtService = {
   async createAccessToken(userId: string) {
     const accessToken = jwt.sign({ userId }, settings.ACCESS_TOKEN_SECRET, {
-      expiresIn: '10s',
+      expiresIn: '10d',
     });
     return accessToken;
   },
@@ -12,7 +12,7 @@ export const jwtService = {
     const refreshToken = jwt.sign(
       { userId, deviceId },
       settings.REFRESH_TOKEN_SECRET,
-      { expiresIn: '20s' },
+      { expiresIn: '20d' },
     );
     return refreshToken;
   },
@@ -28,20 +28,21 @@ export const jwtService = {
   async getRefreshTokenUserIdAndDeviceId(token: string) {
     try {
       const result: any = jwt.verify(token, settings.REFRESH_TOKEN_SECRET);
+
       return {
         userId: result.userId,
         deviceId: result.deviceId,
+        iat: new Date(result.iat * 1000).toISOString(),
       };
     } catch (error) {
       console.log('getRefreshTokenUserIdAndDeviceId error', error);
       return null;
     }
   },
-  async getExpRefreshToken(token: string) {
+  async getIatRefreshToken(token: string) {
     try {
       const result: any = jwt.verify(token, settings.REFRESH_TOKEN_SECRET);
-
-      return result.exp * 1000;
+      return result.iat * 1000;
     } catch (error) {
       return null;
     }

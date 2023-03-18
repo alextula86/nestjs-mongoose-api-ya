@@ -61,13 +61,13 @@ export class AuthService {
     if (!authTokens) {
       return null;
     }
-    const { accessToken, refreshToken, expRefreshToken } = authTokens;
+    const { accessToken, refreshToken, iatRefreshToken } = authTokens;
     // Создаем документ устройства
     const madeDevice = await this.deviceRepository.createDevice({
       deviceId,
       ip: ip,
       title: deviceTitle,
-      lastActiveDate: new Date(expRefreshToken).toISOString(),
+      lastActiveDate: new Date(iatRefreshToken).toISOString(),
       userId: user.id,
     });
     // Сохраняем устройство в базе
@@ -111,6 +111,7 @@ export class AuthService {
   async refreshToken(
     userId: string,
     deviceId: string,
+    deviceIat: string,
   ): Promise<{ accessToken: string; refreshToken: string } | null> {
     // Ищем пользователя по его идентификатору
     const user = await this.userRepository.findUserById(userId);
@@ -120,19 +121,30 @@ export class AuthService {
     if (!user || !device) {
       return null;
     }
+
+    console.log('deviceIat', deviceIat);
+    console.log('device', device);
+
+    if (deviceIat !== device.lastActiveDate) {
+      return null;
+    }
+
     // Обновляем access токен, refresh токен и дату истекания срока refreshToken
     const authTokens = await user.generateAuthTokens(user.id, device.deviceId);
     // Если возникла ошибка в формировании токенов, то вернем null для возрвата 401 ошибки
     if (!authTokens) {
       return null;
     }
-    const { accessToken, refreshToken, expRefreshToken } = authTokens;
+    const { accessToken, refreshToken, iatRefreshToken } = authTokens;
+    console.log('iatRefreshToken', iatRefreshToken);
+    console.log('device.lastActiveDate', device.lastActiveDate);
+
     // Обновляем refresh токен пользователя
     user.updateRefreshToken(refreshToken);
     // Сохраняем пользователя в базе
     await this.userRepository.save(user);
     // Обновляем дату у устройства
-    device.updateLastActiveDate(new Date(expRefreshToken).toISOString());
+    device.updateLastActiveDate(new Date(iatRefreshToken).toISOString());
     // Сохраняем устройство в базе
     await this.deviceRepository.save(device);
 

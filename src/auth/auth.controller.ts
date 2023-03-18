@@ -107,14 +107,14 @@ export class AuthController {
   @UseGuards(AuthGuardRefreshToken)
   @HttpCode(HttpStatus.OK)
   async refreshToken(
-    @Req() request: Request & { userId: string; deviceId: string },
+    @Req()
+    request: Request & { userId: string; deviceId: string; deviceIat: string },
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthAccessTokenModel> {
-    console.log('request.userId', request.userId);
-    console.log('request.deviceId', request.deviceId);
     const authUserTokens = await this.authService.refreshToken(
       request.userId,
       request.deviceId,
+      request.deviceIat,
     );
     // Если при logout возникли ошибки возращаем статус ошибки 401
     if (!authUserTokens) {
