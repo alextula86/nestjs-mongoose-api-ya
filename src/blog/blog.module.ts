@@ -4,6 +4,7 @@ import { BlogController } from './blog.controller';
 import { BlogQueryRepository } from './blog.query.repository';
 import { BlogRepository } from './blog.repository';
 import { BlogService } from './blog.service';
+import { IsBlogExistConstraint } from './custom-validators/customValidateBlog';
 import { Blog, BlogSchema } from './schemas/blog.schema';
 
 @Module({
@@ -11,7 +12,12 @@ import { Blog, BlogSchema } from './schemas/blog.schema';
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
   ],
   controllers: [BlogController],
-  providers: [BlogService, BlogRepository, BlogQueryRepository],
+  providers: [
+    BlogService,
+    BlogRepository,
+    BlogQueryRepository,
+    IsBlogExistConstraint,
+  ],
   exports: [BlogRepository],
 })
 export class BlogModule {}

@@ -47,6 +47,7 @@ import { AuthQueryRepository } from './auth/auth.query.repository';
 
 import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
+import { IsBlogExistConstraint } from './blog/custom-validators/customValidateBlog';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { EmailManager } from './managers';
     LikeStatusRepository,
     EmailManager,
     EmailAdapter,
+    IsBlogExistConstraint,
   ],
   exports: [
     BlogService,
