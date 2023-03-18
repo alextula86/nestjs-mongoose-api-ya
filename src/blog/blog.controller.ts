@@ -170,7 +170,7 @@ export class BlogController {
   @UseGuards(AuthGuardBasic)
   @HttpCode(HttpStatus.CREATED)
   async createPostsByBlogId(
-    @Param() { blogId }: BlogIdDto,
+    @Param('blogId') blogId: string,
     @Body() createPostBaseDto: CreatePostBaseDto,
   ): Promise<PostViewModel> {
     // Создаем пост
