@@ -1,45 +1,51 @@
 import {
-  BadRequestException,
-  Body,
   Controller,
-  Delete,
-  ForbiddenException,
   Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Param,
   Post,
   Put,
-  Query,
+  Delete,
   Req,
+  Query,
+  Param,
+  Body,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  HttpCode,
+  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+
 import { AuthGuardBasic, AuthGuardBearer } from '../auth.guard';
-import { LikeStatuses, ResponseViewModelDetail } from '../types';
 
-import { PostQueryRepository } from './post.query.repository';
-import { PostService } from './post.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { PostViewModel, QueryPostModel } from './types';
-
-import { CommentQueryRepository } from '../comment/comment.query.repository';
-import { CommentService } from '../comment/comment.service';
 import { CreateCommentDto } from '../comment/dto';
+import { AddLikeStatusDTO } from '../likeStatus/dto';
+
+import { PostService } from './post.service';
+import { PostQueryRepository } from './post.query.repository';
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+
+import { LikeStatuses, ResponseViewModelDetail } from '../types';
+import { PostViewModel, QueryPostModel } from './types';
 import { CommentViewModel, QueryCommentModel } from '../comment/types';
 
-import { LikeStatusService } from '../likeStatus/likeStatus.service';
-import { AddLikeStatusDTO } from '../likeStatus/dto';
+import {
+  CreatePostCommand,
+  UpdatePostCommand,
+  DeletePostCommand,
+} from './use-cases';
+import { CreateCommentCommand } from '../comment/use-cases';
+import { UpdateLikeStatusPostCommand } from '../likeStatus/use-cases';
 
 @Controller('api/posts')
 export class PostController {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly postService: PostService,
     private readonly postQueryRepository: PostQueryRepository,
-    private readonly commentService: CommentService,
     private readonly commentQueryRepository: CommentQueryRepository,
-    private readonly likeStatusService: LikeStatusService,
   ) {}
   @Get()
   @UseGuards(AuthGuardBearer)
@@ -97,11 +103,15 @@ export class PostController {
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModel> {
     // Создаем пост
-    const { postId, statusCode, statusMessage } =
-      await this.postService.createPost(createPostDto);
+    const { postId, statusCode } = await this.commandBus.execute(
+      new CreatePostCommand(createPostDto),
+    );
     // Если при создании поста возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.CREATED) {
-      throw new HttpException(statusMessage, statusCode);
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException();
     }
     // Порлучаем созданный пост в формате ответа пользователю
     const foundPost = await this.postQueryRepository.findPostById(
@@ -120,9 +130,8 @@ export class PostController {
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<void> {
     // Обновляем пост
-    const { statusCode, statusMessage } = await this.postService.updatePost(
-      postId,
-      updatePostDto,
+    const { statusCode, statusMessage } = await this.commandBus.execute(
+      new UpdatePostCommand(postId, updatePostDto),
     );
 
     if (statusCode === HttpStatus.FORBIDDEN) {
@@ -143,8 +152,10 @@ export class PostController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostById(@Param('postId') postId: string): Promise<boolean> {
     // Удаляем пост и связанные с ним комментарии
-    const isPostDeleted = await this.postService.deletePostById(postId);
-    // Если при удалении поста вернулись ошибка возвращаем ее
+    const isPostDeleted = await this.commandBus.execute(
+      new DeletePostCommand(postId),
+    );
+    // Если при удалении пост не был найден, возвращаем ошибку 404
     if (!isPostDeleted) {
       throw new NotFoundException();
     }
@@ -192,12 +203,10 @@ export class PostController {
     @Param('postId') postId: string,
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<CommentViewModel> {
-    // Создаем пост
+    // Создаем комментарий
     const { commentId, statusCode, statusMessage } =
-      await this.commentService.createCommentsByPostId(
-        request.userId,
-        postId,
-        createCommentDto,
+      await this.commandBus.execute(
+        new CreateCommentCommand(request.userId, postId, createCommentDto),
       );
     // Если пост для которого создается комментарий не найден
     // Возвращаем статус ошибки 404
@@ -227,12 +236,9 @@ export class PostController {
     @Body() addLikeStatusDTO: AddLikeStatusDTO,
   ): Promise<void> {
     // Обновляем лайк статус поста
-    const { statusCode, statusMessage } =
-      await this.likeStatusService.updateLikeStatusOfPost(
-        request.userId,
-        postId,
-        addLikeStatusDTO,
-      );
+    const { statusCode, statusMessage } = await this.commandBus.execute(
+      new UpdateLikeStatusPostCommand(request.userId, postId, addLikeStatusDTO),
+    );
 
     // Если пост не найден, возращаем статус ошибки 404
     if (statusCode === HttpStatus.NOT_FOUND) {

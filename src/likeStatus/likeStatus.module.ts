@@ -1,7 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
+import {
+  UpdateLikeStatusCommentUseCase,
+  UpdateLikeStatusPostUseCase,
+} from './use-cases';
 import { LikeStatusRepository } from './likeStatus.repository';
 import { LikeStatus, LikeStatusSchema } from './schemas';
+
+const useCases = [UpdateLikeStatusCommentUseCase, UpdateLikeStatusPostUseCase];
 
 @Module({
   imports: [
@@ -9,6 +16,6 @@ import { LikeStatus, LikeStatusSchema } from './schemas';
       { name: LikeStatus.name, schema: LikeStatusSchema },
     ]),
   ],
-  providers: [LikeStatusRepository],
+  providers: [LikeStatusRepository, ...useCases],
 })
 export class CommentModule {}

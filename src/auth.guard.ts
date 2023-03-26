@@ -7,9 +7,16 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 import { Request } from 'express';
+
 import { SessionService } from './session/session.service';
 import { jwtService } from './application';
+import {
+  CreateSessionCommand,
+  IncreaseAttemptSessionCommand,
+  ResetAttemptSessionCommand,
+} from './session/use-cases';
 
 @Injectable()
 export class AuthGuardBasic implements CanActivate {
@@ -97,8 +104,6 @@ export class AuthGuardRefreshToken implements CanActivate {
         request.cookies.refreshToken,
       );
 
-    console.log('refreshTokenResponse', refreshTokenResponse);
-
     if (
       !refreshTokenResponse ||
       !refreshTokenResponse.userId ||
@@ -117,7 +122,10 @@ export class AuthGuardRefreshToken implements CanActivate {
 
 @Injectable()
 export class AuthCountRequests implements CanActivate {
-  constructor(private readonly sessionService: SessionService) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly sessionService: SessionService,
+  ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const ip = request.ip;
@@ -134,7 +142,9 @@ export class AuthCountRequests implements CanActivate {
     );
 
     if (!foundSession) {
-      await this.sessionService.createSession({ ip, url, deviceTitle });
+      await this.commandBus.execute(
+        new CreateSessionCommand({ ip, url, deviceTitle }),
+      );
       return true;
     }
 
@@ -143,11 +153,15 @@ export class AuthCountRequests implements CanActivate {
     const diffSeconds = (currentLocalDate - sessionDate) / 1000;
 
     if (diffSeconds > limitSecondsRate) {
-      await this.sessionService.resetAttempt(foundSession.id);
+      await this.commandBus.execute(
+        new ResetAttemptSessionCommand(foundSession.id),
+      );
       return true;
     }
 
-    const response = await this.sessionService.increaseAttempt(foundSession.id);
+    const response = await this.commandBus.execute(
+      new IncreaseAttemptSessionCommand(foundSession.id),
+    );
 
     if (!response) {
       throw new BadGatewayException();

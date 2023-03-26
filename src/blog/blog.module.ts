@@ -1,15 +1,25 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BlogController } from './blog.controller';
-import { BlogQueryRepository } from './blog.query.repository';
-import { BlogRepository } from './blog.repository';
-import { BlogService } from './blog.service';
+import { CqrsModule } from '@nestjs/cqrs';
+
 import { IsBlogExistConstraint } from './custom-validators/customValidateBlog';
+import { BlogController } from './blog.controller';
+import { BlogService } from './blog.service';
+import {
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+} from './use-cases';
+import { BlogRepository } from './blog.repository';
+import { BlogQueryRepository } from './blog.query.repository';
 import { Blog, BlogSchema } from './schemas/blog.schema';
+
+const useCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
+    CqrsModule,
   ],
   controllers: [BlogController],
   providers: [
@@ -17,6 +27,7 @@ import { Blog, BlogSchema } from './schemas/blog.schema';
     BlogRepository,
     BlogQueryRepository,
     IsBlogExistConstraint,
+    ...useCases,
   ],
   exports: [BlogRepository],
 })

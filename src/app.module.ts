@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -30,6 +31,47 @@ import { DeviceService } from './device/device.service';
 import { SessionService } from './session/session.service';
 import { LikeStatusService } from './likeStatus/likeStatus.service';
 
+import {
+  LoginUseCase,
+  LogoutUseCase,
+  RefreshTokenUseCase,
+  RegisterUserUseCase,
+  RegistrationConfirmationUseCase,
+  RegistrationEmailResendingUseCase,
+  PasswordRecoveryUseCase,
+  NewPasswordUseCase,
+} from './auth/use-cases';
+import { CreateUserUseCase } from './user/use-cases';
+import {
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+} from './blog/use-cases';
+import {
+  CreatePostUseCase,
+  UpdatePostUseCase,
+  CreatePostsByBlogIdUseCase,
+  DeletePostUseCase,
+} from './post/use-cases';
+import {
+  CreateCommentUseCase,
+  UpdateCommentUseCase,
+  DeleteCommentUseCase,
+} from './comment/use-cases';
+import {
+  DeleteAllDevicesUseCase,
+  DeleteDeviceByIdUseCase,
+} from './device/use-cases';
+import {
+  CreateSessionUseCase,
+  IncreaseAttemptSessionUseCase,
+  ResetAttemptSessionUseCase,
+} from './session/use-cases';
+import {
+  UpdateLikeStatusCommentUseCase,
+  UpdateLikeStatusPostUseCase,
+} from './likeStatus/use-cases';
+
 import { UserRepository } from './user/user.repository';
 import { BlogRepository } from './blog/blog.repository';
 import { PostRepository } from './post/post.repository';
@@ -48,6 +90,72 @@ import { AuthQueryRepository } from './auth/auth.query.repository';
 import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
 import { IsBlogExistConstraint } from './blog/custom-validators/customValidateBlog';
+
+const authProviders = [
+  AuthService,
+  AuthQueryRepository,
+  LoginUseCase,
+  LogoutUseCase,
+  RefreshTokenUseCase,
+  RegisterUserUseCase,
+  RegistrationConfirmationUseCase,
+  RegistrationEmailResendingUseCase,
+  PasswordRecoveryUseCase,
+  NewPasswordUseCase,
+];
+const userProviders = [
+  UserService,
+  UserRepository,
+  UserQueryRepository,
+  CreateUserUseCase,
+];
+const blogProviders = [
+  IsBlogExistConstraint,
+  BlogService,
+  BlogRepository,
+  BlogQueryRepository,
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+];
+const postProviders = [
+  PostService,
+  PostRepository,
+  PostQueryRepository,
+  CreatePostUseCase,
+  UpdatePostUseCase,
+  CreatePostsByBlogIdUseCase,
+  DeletePostUseCase,
+];
+const commentProviders = [
+  CommentService,
+  CommentRepository,
+  CommentQueryRepository,
+  CreateCommentUseCase,
+  UpdateCommentUseCase,
+  DeleteCommentUseCase,
+];
+const deviceProviders = [
+  DeviceService,
+  DeviceRepository,
+  DeviceQueryRepository,
+  DeleteAllDevicesUseCase,
+  DeleteDeviceByIdUseCase,
+];
+const sessionSProviders = [
+  SessionService,
+  SessionRepository,
+  CreateSessionUseCase,
+  IncreaseAttemptSessionUseCase,
+  ResetAttemptSessionUseCase,
+];
+const likeStatusSProviders = [
+  LikeStatusService,
+  LikeStatusRepository,
+  UpdateLikeStatusCommentUseCase,
+  UpdateLikeStatusPostUseCase,
+];
+const adapters = [EmailManager, EmailAdapter];
 
 @Module({
   imports: [
@@ -76,6 +184,7 @@ import { IsBlogExistConstraint } from './blog/custom-validators/customValidateBl
         from: '"nestjs-video-api" <a.marcuk2023@gmail.com>',
       },
     }),
+    CqrsModule,
   ],
   controllers: [
     AppController,
@@ -89,46 +198,36 @@ import { IsBlogExistConstraint } from './blog/custom-validators/customValidateBl
   ],
   providers: [
     AppService,
-    AuthService,
-    AuthQueryRepository,
-    UserService,
-    UserRepository,
-    UserQueryRepository,
-    BlogService,
-    BlogRepository,
-    BlogQueryRepository,
-    PostService,
-    PostRepository,
-    PostQueryRepository,
-    CommentService,
-    CommentRepository,
-    CommentQueryRepository,
-    DeviceService,
-    DeviceRepository,
-    DeviceQueryRepository,
-    SessionService,
-    SessionRepository,
-    LikeStatusService,
-    LikeStatusRepository,
-    EmailManager,
-    EmailAdapter,
-    IsBlogExistConstraint,
+    ...authProviders,
+    ...userProviders,
+    ...blogProviders,
+    ...postProviders,
+    ...commentProviders,
+    ...deviceProviders,
+    ...sessionSProviders,
+    ...likeStatusSProviders,
+    ...adapters,
   ],
   exports: [
     BlogService,
     BlogRepository,
     BlogQueryRepository,
+
     PostService,
     PostRepository,
     PostQueryRepository,
+
     CommentService,
     CommentRepository,
     CommentQueryRepository,
+
     DeviceService,
     DeviceRepository,
     DeviceQueryRepository,
+
     SessionService,
     SessionRepository,
+
     LikeStatusService,
     LikeStatusRepository,
   ],

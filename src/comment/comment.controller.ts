@@ -1,34 +1,38 @@
 import {
-  BadRequestException,
-  Body,
   Controller,
-  Delete,
-  ForbiddenException,
   Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Param,
   Put,
+  Delete,
   Req,
+  Param,
+  Body,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  HttpCode,
+  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+
 import { AuthGuardBearer } from '../auth.guard';
-import { CommentQueryRepository } from './comment.query.repository';
-import { CommentService } from './comment.service';
-import { LikeStatusService } from '../likeStatus/likeStatus.service';
+
 import { UpdateCommentDto } from './dto';
 import { AddLikeStatusDTO } from '../likeStatus/dto';
+
+import { UpdateCommentCommand, DeleteCommentCommand } from './use-cases';
+import { UpdateLikeStatusCommentCommand } from '../likeStatus/use-cases';
+
+import { CommentQueryRepository } from './comment.query.repository';
+
 import { CommentViewModel } from './types';
 
 @UseGuards(AuthGuardBearer)
 @Controller('api/comments')
 export class CommentController {
   constructor(
-    private readonly commentService: CommentService,
+    private readonly commandBus: CommandBus,
     private readonly commentQueryRepository: CommentQueryRepository,
-    private readonly likeStatusService: LikeStatusService,
   ) {}
   // Получение конкретного комментария по его идентификатору
   @Get(':commentId')
@@ -58,18 +62,22 @@ export class CommentController {
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<boolean> {
     // Обновляем комментарий
-    const { statusCode, statusMessage } =
-      await this.commentService.updateComment(
-        request.userId,
-        commentId,
-        updateCommentDto,
-      );
-
-    // Если при обновлении комментария возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.NO_CONTENT) {
-      throw new HttpException(statusMessage, statusCode);
+    const { statusCode, statusMessage } = await this.commandBus.execute(
+      new UpdateCommentCommand(request.userId, commentId, updateCommentDto),
+    );
+    // Если комментарий не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
     }
-
+    // Если пользователь не найден, возвращаем ошибку 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException();
+    }
+    // Проверяем принадлежит ли обновляемый комментарий пользователю
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException(statusMessage);
+    }
+    // Иначе возвращаем статус 204
     return true;
   }
   // Удаление комментария
@@ -80,22 +88,19 @@ export class CommentController {
     @Param('commentId') commentId: string,
   ): Promise<boolean> {
     // Удаляем комментарий
-    const { statusCode } = await this.commentService.deleteCommentById(
-      commentId,
-      request.userId,
+    const { statusCode } = await this.commandBus.execute(
+      new DeleteCommentCommand(commentId, request.userId),
     );
 
     // Если комментарий не найден, возвращаем ошиюку 404
     if (statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException();
     }
-
     // Если удаляется комментарий, который не принадлежит пользователю
     // Возвращаем 403
     if (statusCode === HttpStatus.FORBIDDEN) {
       throw new ForbiddenException();
     }
-
     // Иначе возвращаем статус 204
     return true;
   }
@@ -108,12 +113,13 @@ export class CommentController {
     @Body() addLikeStatusDTO: AddLikeStatusDTO,
   ): Promise<void> {
     // Обновляем лайк статус комментария
-    const { statusCode, statusMessage } =
-      await this.likeStatusService.updateLikeStatusOfComment(
+    const { statusCode, statusMessage } = await this.commandBus.execute(
+      new UpdateLikeStatusCommentCommand(
         request.userId,
         commentId,
         addLikeStatusDTO,
-      );
+      ),
+    );
 
     // Если комментарий не найден, возращаем статус ошибки 404
     if (statusCode === HttpStatus.NOT_FOUND) {

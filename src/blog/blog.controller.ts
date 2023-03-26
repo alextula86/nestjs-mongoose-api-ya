@@ -1,24 +1,32 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Param,
   Post,
   Put,
-  Query,
+  Delete,
   Req,
+  Query,
+  Param,
+  Body,
+  BadRequestException,
+  NotFoundException,
+  HttpCode,
+  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+
 import { AuthGuardBasic, AuthGuardBearer } from '../auth.guard';
+import { CreatePostsByBlogIdCommand } from '../post/use-cases';
+import {
+  CreateBlogCommand,
+  DeleteBlogCommand,
+  UpdateBlogCommand,
+} from './use-cases';
 import { BlogService } from './blog.service';
-import { PostService } from '../post/post.service';
 import { BlogQueryRepository } from './blog.query.repository';
 import { PostQueryRepository } from '../post/post.query.repository';
+
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { CreatePostBaseDto } from '../post/dto/post.dto';
 import { QueryBlogModel, BlogViewModel } from './types';
@@ -28,8 +36,8 @@ import { ResponseViewModelDetail } from '../types';
 @Controller('api/blogs')
 export class BlogController {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly blogService: BlogService,
-    private readonly postService: PostService,
     private readonly blogQueryRepository: BlogQueryRepository,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
@@ -65,7 +73,7 @@ export class BlogController {
     const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
     // Если блог не найден возвращаем ошибку
     if (!foundBlog) {
-      throw new HttpException('Blog is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Возвращаем блогера в формате ответа пользователю
     return foundBlog;
@@ -78,11 +86,12 @@ export class BlogController {
     @Body() createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModel> {
     // Создаем блогера
-    const { blogId, statusCode, statusMessage } =
-      await this.blogService.createBlog(createBlogDto);
+    const { blogId, statusCode } = await this.commandBus.execute(
+      new CreateBlogCommand(createBlogDto),
+    );
     // Если при создании блогера возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.CREATED) {
-      throw new HttpException(statusMessage, statusCode);
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException();
     }
     // Порлучаем созданный блог в формате ответа пользователю
     const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
@@ -98,13 +107,12 @@ export class BlogController {
     @Body() updateBlogDto: UpdateBlogDto,
   ): Promise<boolean> {
     // Обновляем блогера
-    const { statusCode, statusMessage } = await this.blogService.updateBlog(
-      blogId,
-      updateBlogDto,
+    const { statusCode } = await this.commandBus.execute(
+      new UpdateBlogCommand(blogId, updateBlogDto),
     );
-    // Если при обновлении блогера возникли ошибки возращаем статус ошибки
-    if (statusCode !== HttpStatus.NO_CONTENT) {
-      throw new HttpException(statusMessage, statusCode);
+    // Если при обновлении блогера, он не был найден, возвращаем 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
     }
 
     return true;
@@ -115,10 +123,12 @@ export class BlogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlogById(@Param('blogId') blogId: string): Promise<boolean> {
     // Удаляем блогера
-    const isBlogDeleted = await this.blogService.deleteBlogById(blogId);
-    // Если при удалении блогера вернулись ошибка возвращаем ее
+    const isBlogDeleted = await this.commandBus.execute(
+      new DeleteBlogCommand(blogId),
+    );
+    // Если при удалении блогер не был найден, возвращаем ошибку 404
     if (!isBlogDeleted) {
-      throw new HttpException('Blog is not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
     // Иначе возвращаем true
     return isBlogDeleted;
@@ -174,9 +184,8 @@ export class BlogController {
     @Body() createPostBaseDto: CreatePostBaseDto,
   ): Promise<PostViewModel> {
     // Создаем пост
-    const { postId, statusCode } = await this.postService.createPostsByBlogId(
-      blogId,
-      createPostBaseDto,
+    const { postId, statusCode } = await this.commandBus.execute(
+      new CreatePostsByBlogIdCommand(blogId, createPostBaseDto),
     );
     // Если блогер не найден, возвращаем ошибку 404
     if (statusCode === HttpStatus.NOT_FOUND) {
