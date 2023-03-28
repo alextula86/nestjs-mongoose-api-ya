@@ -197,6 +197,11 @@ export class User implements UserEntity {
     this.banInfo.banReason = banReason;
   }
 
+  // Проверяем забанен ли пользователь
+  checkUserBanned() {
+    return this.banInfo.isBanned && this.banInfo.banDate;
+  }
+
   static async make(
     { login, password, email }: MakeUserModel,
     UserModel: UserModelType,
@@ -265,6 +270,7 @@ UserSchema.methods = {
   isCheckCredentials: User.prototype.isCheckCredentials,
   generateAuthTokens: User.prototype.generateAuthTokens,
   banUser: User.prototype.banUser,
+  checkUserBanned: User.prototype.checkUserBanned,
 };
 
 UserSchema.statics = {

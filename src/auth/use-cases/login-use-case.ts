@@ -32,7 +32,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
     // Ищем пользователя по логину или емайлу
     const user = await this.userRepository.findByLoginOrEmail(loginOrEmail);
     // Если пользователь не найден, то вернем null для возрвата 401 ошибки
-    if (!user) {
+    if (!user || user.checkUserBanned()) {
       return null;
     }
     // Проверка учетных данных по паролю
