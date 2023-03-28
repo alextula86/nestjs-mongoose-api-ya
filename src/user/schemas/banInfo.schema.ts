@@ -10,14 +10,14 @@ export class BanInfoSchema {
 
   @Prop({
     type: Date,
-    required: [true, 'The banDate field is required'],
+    default: null,
   })
   banDate: Date;
 
   @Prop({
     type: String,
     trim: true,
-    default: '',
+    default: null,
   })
   banReason: string;
 }

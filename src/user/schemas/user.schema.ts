@@ -19,7 +19,7 @@ import {
 } from '../types';
 
 @Schema()
-export class User {
+export class User implements UserEntity {
   @Prop({
     type: String,
     required: [true, 'The id field is required'],
@@ -211,29 +211,29 @@ export class User {
       passwordSalt,
     );
 
-    const accountData = {
+    const accountData: AccountDataType = {
       login: trim(String(login)),
       email: trim(String(email)),
       passwordHash,
       createdAt: new Date().toISOString(),
     };
 
-    const emailConfirmation = {
+    const emailConfirmation: EmailConfirmationType = {
       confirmationCode,
       expirationDate: add(new Date(), { hours: 1, minutes: 30 }),
       isConfirmed: false,
     };
 
-    const passwordRecovery = {
+    const passwordRecovery: PasswordRecoveryType = {
       recoveryCode: '',
       expirationDate: new Date(),
       isRecovered: true,
     };
 
-    const banInfo = {
+    const banInfo: BanInfoDataType = {
       isBanned: false,
-      banDate: new Date(),
-      banReason: '',
+      banDate: null,
+      banReason: null,
     };
 
     const refreshToken = '';
