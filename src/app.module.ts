@@ -42,7 +42,7 @@ import {
   PasswordRecoveryUseCase,
   NewPasswordUseCase,
 } from './auth/use-cases';
-import { CreateUserUseCase } from './user/use-cases';
+import { CreateUserUseCase, BanUserUseCase } from './user/use-cases';
 import {
   CreateBlogUseCase,
   UpdateBlogUseCase,
@@ -108,6 +108,7 @@ const userProviders = [
   UserRepository,
   UserQueryRepository,
   CreateUserUseCase,
+  BanUserUseCase,
 ];
 const blogProviders = [
   IsBlogExistConstraint,

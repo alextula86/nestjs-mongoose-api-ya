@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   Matches,
@@ -40,4 +41,23 @@ export class CreateUserDto {
   @Transform(({ value }) => value.trim())
   @IsEmail()
   email: string;
+}
+
+export class BanUserDto {
+  @IsNotEmpty({
+    message: 'The login field is required',
+  })
+  @IsBoolean({
+    message: 'The isBanned field contains a logical type',
+  })
+  isBanned: boolean;
+
+  @IsNotEmpty({
+    message: 'The password field is required',
+  })
+  @Transform(({ value }) => value.trim())
+  @MinLength(20, {
+    message: 'The banReason field must be at least 20, got $value',
+  })
+  banReason: string;
 }

@@ -4,12 +4,12 @@ import { CqrsModule } from '@nestjs/cqrs';
 
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { CreateUserUseCase } from './use-cases';
+import { CreateUserUseCase, BanUserUseCase } from './use-cases';
 import { UserRepository } from './user.repository';
 import { UserQueryRepository } from './user.query.repository';
 import { User, UserSchema } from './schemas/user.schema';
 
-const useCases = [CreateUserUseCase];
+const useCases = [CreateUserUseCase, BanUserUseCase];
 
 @Module({
   imports: [

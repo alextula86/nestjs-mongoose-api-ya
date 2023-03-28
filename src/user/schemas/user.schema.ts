@@ -188,11 +188,11 @@ export class User implements UserEntity {
     };
   }
   // Отправить пользователя в бан
-  banUser(banReason: string) {
+  banUser(isBanned: boolean, banReason: string) {
     // Записываем дату бана пользователя
     this.banInfo.banDate = new Date();
     // Устанавливаем флаг бана пользователя
-    this.banInfo.isBanned = true;
+    this.banInfo.isBanned = isBanned;
     // Записываем причину бана пользователя
     this.banInfo.banReason = banReason;
   }

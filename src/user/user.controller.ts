@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Query,
   Param,
@@ -11,15 +12,16 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthGuardBasic } from '../auth.guard';
-import { CreateUserCommand } from './use-cases';
+import { CreateUserCommand, BanUserCommand } from './use-cases';
 import { UserService } from './user.service';
 import { UserQueryRepository } from './user.query.repository';
 
-import { CreateUserDto } from './dto/user.dto';
+import { BanUserDto, CreateUserDto } from './dto/user.dto';
 import { ResponseViewModelDetail } from '../types';
 import { QueryUserModel, UserViewModel } from './types';
 
@@ -74,5 +76,21 @@ export class UserController {
     }
     // Иначе возвращаем true
     return isUserDeleted;
+  }
+  // Бан пользователя
+  @Put(':userId/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async banUser(
+    @Param('userId') userId: string,
+    @Body() banUserDto: BanUserDto,
+  ): Promise<void> {
+    // Баним пользователя
+    const { statusCode } = await this.commandBus.execute(
+      new BanUserCommand(userId, banUserDto),
+    );
+    // Если при бане пользователя возникли ошибки возращаем статус и текст ошибки
+    if (statusCode === HttpStatus.UNAUTHORIZED) {
+      throw new UnauthorizedException();
+    }
   }
 }

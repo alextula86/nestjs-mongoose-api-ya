@@ -54,6 +54,12 @@ export class DeviceRepository {
 
     return deletedCount > 0;
   }
+  // Удаление всех устройств пользователя
+  async deleteAllUserDevices(userId: string): Promise<boolean> {
+    const { deletedCount } = await this.DeviceModel.deleteMany({ userId });
+
+    return deletedCount > 0;
+  }
   // Удаление коллекции
   async deleteAll(): Promise<boolean> {
     const { deletedCount } = await this.DeviceModel.deleteMany({});
