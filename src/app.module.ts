@@ -4,33 +4,33 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CqrsModule } from '@nestjs/cqrs';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { User, UserSchema } from './user/schemas';
-import { Blog, BlogSchema } from './blog/schemas';
-import { Post, PostSchema } from './post/schemas';
-import { Comment, CommentSchema } from './comment/schemas';
-import { Device, DeviceSchema } from './device/schemas';
-import { Session, SessionSchema } from './session/schemas';
-import { LikeStatus, LikeStatusSchema } from './likeStatus/schemas';
+import { AppController } from '@src/app.controller';
+import { AppService } from '@src/app.service';
+import { User, UserSchema } from '@src/api/user/schemas';
+import { Blog, BlogSchema } from '@src/api/blog/schemas';
+import { Post, PostSchema } from '@src/api/post/schemas';
+import { Comment, CommentSchema } from '@src/api/comment/schemas';
+import { Device, DeviceSchema } from '@src/api/device/schemas';
+import { Session, SessionSchema } from '@src/api/session/schemas';
+import { LikeStatus, LikeStatusSchema } from '@src/api/likeStatus/schemas';
 
-import { AuthController } from './auth/auth.controller';
-import { UserController } from './user/user.controller';
-import { BlogController } from './blog/blog.controller';
-import { BloggerController } from './blog/blogger.controller';
-import { PostController } from './post/post.controller';
-import { DeviceController } from './device/device.controller';
-import { CommentController } from './comment/comment.controller';
-import { TestingController } from './testing/testing.controller';
+import { AuthController } from '@src/api/auth/auth.controller';
+import { UserController } from '@src/api/user/user.controller';
+import { BlogController } from '@src/api/blog/blog.controller';
+import { BloggerController } from '@src/api/blog/blogger.controller';
+import { PostController } from '@src/api/post/post.controller';
+import { DeviceController } from '@src/api/device/device.controller';
+import { CommentController } from '@src/api/comment/comment.controller';
+import { TestingController } from '@src/api/testing/testing.controller';
 
-import { AuthService } from './auth/auth.service';
-import { UserService } from './user/user.service';
-import { BlogService } from './blog/blog.service';
-import { PostService } from './post/post.service';
-import { CommentService } from './comment/comment.service';
-import { DeviceService } from './device/device.service';
-import { SessionService } from './session/session.service';
-import { LikeStatusService } from './likeStatus/likeStatus.service';
+import { AuthService } from '@src/api/auth/auth.service';
+import { UserService } from '@src/api/user/user.service';
+import { BlogService } from '@src/api/blog/blog.service';
+import { PostService } from '@src/api/post/post.service';
+import { CommentService } from '@src/api/comment/comment.service';
+import { DeviceService } from '@src/api/device/device.service';
+import { SessionService } from '@src/api/session/session.service';
+import { LikeStatusService } from '@src/api/likeStatus/likeStatus.service';
 
 import {
   LoginUseCase,
@@ -41,55 +41,55 @@ import {
   RegistrationEmailResendingUseCase,
   PasswordRecoveryUseCase,
   NewPasswordUseCase,
-} from './auth/use-cases';
-import { CreateUserUseCase, BanUserUseCase } from './user/use-cases';
+} from '@src/api/auth/use-cases';
+import { CreateUserUseCase, BanUserUseCase } from '@src/api/user/use-cases';
 import {
   CreateBlogUseCase,
   UpdateBlogUseCase,
   DeleteBlogUseCase,
-} from './blog/use-cases';
+} from '@src/api/blog/use-cases';
 import {
   CreatePostUseCase,
   UpdatePostUseCase,
   DeletePostUseCase,
-} from './post/use-cases';
+} from '@src/api/post/use-cases';
 import {
   CreateCommentUseCase,
   UpdateCommentUseCase,
   DeleteCommentUseCase,
-} from './comment/use-cases';
+} from '@src/api/comment/use-cases';
 import {
   DeleteAllDevicesUseCase,
   DeleteDeviceByIdUseCase,
-} from './device/use-cases';
+} from '@src/api/device/use-cases';
 import {
   CreateSessionUseCase,
   IncreaseAttemptSessionUseCase,
   ResetAttemptSessionUseCase,
-} from './session/use-cases';
+} from '@src/api/session/use-cases';
 import {
   UpdateLikeStatusCommentUseCase,
   UpdateLikeStatusPostUseCase,
-} from './likeStatus/use-cases';
+} from '@src/api/likeStatus/use-cases';
 
-import { UserRepository } from './user/user.repository';
-import { BlogRepository } from './blog/blog.repository';
-import { PostRepository } from './post/post.repository';
-import { CommentRepository } from './comment/comment.repository';
-import { DeviceRepository } from './device/device.repository';
-import { SessionRepository } from './session/session.repository';
-import { LikeStatusRepository } from './likeStatus/likeStatus.repository';
+import { UserRepository } from '@src/api/user/user.repository';
+import { BlogRepository } from '@src/api/blog/blog.repository';
+import { PostRepository } from '@src/api/post/post.repository';
+import { CommentRepository } from '@src/api/comment/comment.repository';
+import { DeviceRepository } from '@src/api/device/device.repository';
+import { SessionRepository } from '@src/api/session/session.repository';
+import { LikeStatusRepository } from '@src/api/likeStatus/likeStatus.repository';
 
-import { UserQueryRepository } from './user/user.query.repository';
-import { BlogQueryRepository } from './blog/blog.query.repository';
-import { PostQueryRepository } from './post/post.query.repository';
-import { CommentQueryRepository } from './comment/comment.query.repository';
-import { DeviceQueryRepository } from './device/device.query.repository';
-import { AuthQueryRepository } from './auth/auth.query.repository';
+import { UserQueryRepository } from '@src/api/user/user.query.repository';
+import { BlogQueryRepository } from '@src/api/blog/blog.query.repository';
+import { PostQueryRepository } from '@src/api/post/post.query.repository';
+import { CommentQueryRepository } from '@src/api/comment/comment.query.repository';
+import { DeviceQueryRepository } from '@src/api/device/device.query.repository';
+import { AuthQueryRepository } from '@src/api/auth/auth.query.repository';
 
-import { EmailAdapter } from './adapters';
-import { EmailManager } from './managers';
-import { IsBlogExistConstraint } from './blog/custom-validators/customValidateBlog';
+import { EmailAdapter } from '@src/adapters';
+import { EmailManager } from '@src/managers';
+import { IsBlogExistConstraint } from '@src/api/blog/custom-validators/customValidateBlog';
 
 const authProviders = [
   AuthService,
