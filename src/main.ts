@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
+import 'module-alias/register';
 
 import { AppModule } from './app.module';
 import { ErrorExceptionFilter, HttpExceptionFilter } from './exception.filter';
