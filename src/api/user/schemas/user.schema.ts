@@ -190,16 +190,24 @@ export class User implements UserEntity {
       iatRefreshToken,
     };
   }
-  // Отправить пользователя в бан
+  // Бан пользователя
   banUser(isBanned: boolean, banReason: string) {
-    // Записываем дату бана пользователя
-    this.banInfo.banDate = new Date();
-    // Устанавливаем флаг бана пользователя
-    this.banInfo.isBanned = isBanned;
-    // Записываем причину бана пользователя
-    this.banInfo.banReason = banReason;
+    if (isBanned) {
+      // Записываем дату бана пользователя
+      this.banInfo.banDate = new Date();
+      // Устанавливаем флаг бана пользователя
+      this.banInfo.isBanned = isBanned;
+      // Записываем причину бана пользователя
+      this.banInfo.banReason = banReason;
+    } else {
+      // Очищаем дату бана
+      this.banInfo.banDate = null;
+      // Устанавливаем флаг бана пользователя
+      this.banInfo.isBanned = isBanned;
+      // Очищаем причину бана
+      this.banInfo.banReason = null;
+    }
   }
-
   // Проверяем забанен ли пользователь
   checkUserBanned() {
     return this.banInfo.isBanned && this.banInfo.banDate;

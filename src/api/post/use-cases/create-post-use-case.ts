@@ -46,7 +46,7 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostsCommand> {
     const foundUser = await this.userRepository.findUserById(userId);
     // Если пользователь не найден, возвращаем ошибку 400
     if (isEmpty(foundUser)) {
-      return { postId: null, statusCode: HttpStatus.BAD_REQUEST };
+      return { postId: null, statusCode: HttpStatus.FORBIDDEN };
     }
     // Проверяем принадлежит ли обновляемый блогер пользователю
     if (

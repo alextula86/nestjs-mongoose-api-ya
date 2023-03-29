@@ -31,7 +31,7 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
     const foundUser = await this.userRepository.findUserById(userId);
     // Если пользователь не найден, возвращаем ошибку 400
     if (isEmpty(foundUser)) {
-      return { statusCode: HttpStatus.BAD_REQUEST };
+      return { statusCode: HttpStatus.FORBIDDEN };
     }
     // Проверяем принадлежит ли обновляемый блогер пользователю
     if (

@@ -41,13 +41,13 @@ export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
     const foundBlog = await this.blogRepository.findBlogById(blogId);
     // Если блогер не найден, возвращаем ошибку 400
     if (isEmpty(foundBlog)) {
-      return { statusCode: HttpStatus.BAD_REQUEST };
+      return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Ищем пользователя
     const foundUser = await this.userRepository.findUserById(userId);
     // Если пользователь не найден, возвращаем ошибку 400
     if (isEmpty(foundUser)) {
-      return { statusCode: HttpStatus.BAD_REQUEST };
+      return { statusCode: HttpStatus.FORBIDDEN };
     }
     // Проверяем принадлежит блогер обновляемого поста пользователю
     if (
