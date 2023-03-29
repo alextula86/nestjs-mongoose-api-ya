@@ -118,10 +118,22 @@ export class Blog {
     this.userId = userId;
   }
 
+  setUserLogin(userLogin: string) {
+    if (!trim(userLogin)) {
+      throw new Error('The userLogin field is required');
+    }
+    this.userLogin = userLogin;
+  }
+
   updateAllBlog({ name, description, websiteUrl }: UpdateBlogModel) {
     this.setName(name);
     this.setDescription(description);
     this.setWebsiteUrl(websiteUrl);
+  }
+
+  bindWithUser(userId: string, userLogin: string) {
+    this.setUserId(userId);
+    this.setUserLogin(userLogin);
   }
 
   static make(
@@ -153,7 +165,10 @@ BlogSchema.methods = {
   setName: Blog.prototype.setName,
   setDescription: Blog.prototype.setDescription,
   setWebsiteUrl: Blog.prototype.setWebsiteUrl,
+  setUserId: Blog.prototype.setUserId,
+  setUserLogin: Blog.prototype.setUserLogin,
   updateAllBlog: Blog.prototype.updateAllBlog,
+  bindWithUser: Blog.prototype.bindWithUser,
 };
 
 BlogSchema.statics = {

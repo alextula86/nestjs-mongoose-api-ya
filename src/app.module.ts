@@ -18,6 +18,7 @@ import { AuthController } from '@src/api/auth/auth.controller';
 import { UserController } from '@src/api/user/user.controller';
 import { BlogController } from '@src/api/blog/blog.controller';
 import { BloggerController } from '@src/api/blog/blogger.controller';
+import { SABlogController } from '@src/api/blog/sa-blog.controller';
 import { PostController } from '@src/api/post/post.controller';
 import { DeviceController } from '@src/api/device/device.controller';
 import { CommentController } from '@src/api/comment/comment.controller';
@@ -47,6 +48,7 @@ import {
   CreateBlogUseCase,
   UpdateBlogUseCase,
   DeleteBlogUseCase,
+  BindWithUserBlogUseCase,
 } from '@src/api/blog/use-cases';
 import {
   CreatePostUseCase,
@@ -118,6 +120,7 @@ const blogProviders = [
   CreateBlogUseCase,
   UpdateBlogUseCase,
   DeleteBlogUseCase,
+  BindWithUserBlogUseCase,
 ];
 const postProviders = [
   PostService,
@@ -192,6 +195,7 @@ const adapters = [EmailManager, EmailAdapter];
     UserController,
     BlogController,
     BloggerController,
+    SABlogController,
     PostController,
     CommentController,
     DeviceController,
