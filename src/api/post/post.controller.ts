@@ -15,15 +15,15 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthBearerGuard } from '@src/guards';
-import { LikeStatuses, ResponseViewModelDetail } from '@src/types';
+import { AuthBearerGuard } from '../../guards';
+import { LikeStatuses, ResponseViewModelDetail } from '../../types';
 
-import { CreateCommentCommand } from '@src/api/comment/use-cases';
-import { CommentQueryRepository } from '@src/api/comment/comment.query.repository';
-import { CreateCommentDto } from '@src/api/comment/dto';
+import { CreateCommentCommand } from '../comment/use-cases';
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+import { CreateCommentDto } from '../comment/dto';
 
-import { UpdateLikeStatusPostCommand } from '@src/api/likeStatus/use-cases';
-import { AddLikeStatusDTO } from '@src/api/likeStatus/dto';
+import { UpdateLikeStatusPostCommand } from '../likeStatus/use-cases';
+import { AddLikeStatusDTO } from '../likeStatus/dto';
 
 import { PostService } from './post.service';
 import { PostQueryRepository } from './post.query.repository';

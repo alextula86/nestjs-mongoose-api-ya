@@ -16,8 +16,8 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthdBasicGuard } from '@src/guards';
-import { ResponseViewModelDetail } from '@src/types';
+import { AuthdBasicGuard } from '../../guards';
+import { ResponseViewModelDetail } from '../../types';
 
 import { CreateUserCommand, BanUserCommand } from './use-cases';
 import { UserService } from './user.service';

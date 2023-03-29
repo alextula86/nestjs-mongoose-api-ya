@@ -9,11 +9,10 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
-      "@src/*":["./*"],
       "*": [
+        "./*",
         "app/*",
         "../node_modules/*"
       ]

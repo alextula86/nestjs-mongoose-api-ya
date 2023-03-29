@@ -1,4 +1,4 @@
-import { LikeStatuses } from '@src/types';
+import { LikeStatuses } from '../../../types';
 
 export type AddLikeToPostModel = {
   likeStatus: LikeStatuses;

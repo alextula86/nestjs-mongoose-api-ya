@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 
-import { validateOrRejectModel } from '@src/validate';
-import { EmailManager } from '@src/managers';
+import { validateOrRejectModel } from '../../../validate';
+import { EmailManager } from '../../../managers';
 
-import { UserRepository } from '@src/api/user/user.repository';
+import { UserRepository } from '../../user/user.repository';
 
 import { RegistrationUserDto } from '../dto';
 

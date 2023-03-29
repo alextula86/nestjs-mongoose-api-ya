@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { UserRepository } from '@src/api/user/user.repository';
-import { DeviceRepository } from '@src/api/device/device.repository';
+import { UserRepository } from '../../user/user.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 export class RefreshTokenCommand {
   constructor(

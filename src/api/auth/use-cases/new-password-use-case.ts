@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 
-import { validateOrRejectModel } from '@src/validate';
-import { UserRepository } from '@src/api/user/user.repository';
+import { validateOrRejectModel } from '../../../validate';
+import { UserRepository } from '../../user/user.repository';
 
 import { ConfirmPasswordDto } from '../dto';
 

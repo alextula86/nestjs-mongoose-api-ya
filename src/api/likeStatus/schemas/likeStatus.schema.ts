@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
 
-import { LikeStatuses, PageType } from '@src/types';
+import { LikeStatuses, PageType } from '../../../types';
 
 import { LikeStatusEntity } from '../entity';
 import { MakeLikeStatusModel, LikeStatusStaticsType } from '../types';

@@ -1,4 +1,4 @@
-import { LikeStatuses } from '@src/types';
+import { LikeStatuses } from '../../../types';
 
 import { LikeStatusPostEntity } from '../entity';
 

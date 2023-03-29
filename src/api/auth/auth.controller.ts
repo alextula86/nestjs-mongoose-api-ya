@@ -19,7 +19,7 @@ import {
   AuthBearerGuard,
   AuthRefreshTokenGuard,
   AuthCountRequestsGuard,
-} from '@src/guards';
+} from '../../guards';
 
 import {
   LoginCommand,

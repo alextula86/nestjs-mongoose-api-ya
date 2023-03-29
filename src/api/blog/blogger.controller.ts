@@ -17,17 +17,17 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthBearerGuard } from '@src/guards';
-import { ResponseViewModelDetail } from '@src/types';
+import { AuthBearerGuard } from '../../guards';
+import { ResponseViewModelDetail } from '../../types';
 
 import {
   CreatePostsCommand,
   UpdatePostCommand,
   DeletePostCommand,
-} from '@src/api/post/use-cases';
-import { PostQueryRepository } from '@src/api/post/post.query.repository';
-import { CreatePostDto, UpdatePostDto } from '@src/api/post/dto/post.dto';
-import { PostViewModel } from '@src/api/post/types';
+} from '../post/use-cases';
+import { PostQueryRepository } from '../post/post.query.repository';
+import { CreatePostDto, UpdatePostDto } from '../post/dto/post.dto';
+import { PostViewModel } from '../post/types';
 
 import {
   CreateBlogCommand,

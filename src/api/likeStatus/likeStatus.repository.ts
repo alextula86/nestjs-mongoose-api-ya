@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { LikeStatuses, PageType } from '@src/types';
+import { LikeStatuses, PageType } from '../../types';
 
 import { LikeStatus, LikeStatusDocument, LikeStatusModelType } from './schemas';
 import { MakeLikeStatusModel } from './types';

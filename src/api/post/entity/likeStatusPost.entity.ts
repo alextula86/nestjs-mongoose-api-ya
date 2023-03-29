@@ -1,5 +1,5 @@
-import { getNextStrId } from '@src/utils';
-import { LikeStatuses } from '@src/types';
+import { getNextStrId } from '../../../utils';
+import { LikeStatuses } from '../../../types';
 
 export class LikeStatusPostEntity {
   id: string;

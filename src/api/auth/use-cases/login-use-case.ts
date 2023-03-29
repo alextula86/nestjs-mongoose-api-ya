@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { validateOrRejectModel } from '@src/validate';
-import { UserRepository } from '@src/api/user/user.repository';
-import { DeviceRepository } from '@src/api/device/device.repository';
-import { getNextStrId } from '@src/utils';
+import { validateOrRejectModel } from '../../../validate';
+import { getNextStrId } from '../../../utils';
+
+import { UserRepository } from '../../user/user.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 import { AuthUserDto } from '../dto';
 

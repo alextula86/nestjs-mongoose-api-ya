@@ -2,9 +2,9 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-import { validateOrRejectModel } from '@src/validate';
+import { validateOrRejectModel } from '../../../validate';
 
-import { UserRepository } from '@src/api/user/user.repository';
+import { UserRepository } from '../../user/user.repository';
 
 import { CreateBlogDto } from '../dto/blog.dto';
 import { BlogRepository } from '../blog.repository';

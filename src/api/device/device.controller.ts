@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthRefreshTokenGuard } from '@src/guards';
+import { AuthRefreshTokenGuard } from '../../guards';
 
 import { DeleteAllDevicesCommand, DeleteDeviceByIdCommand } from './use-cases';
 import { DeviceQueryRepository } from './device.query.repository';

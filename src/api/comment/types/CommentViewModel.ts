@@ -1,4 +1,4 @@
-import { LikeStatuses } from '@src/types';
+import { LikeStatuses } from '../../../types';
 
 type CommentatorInfo = {
   userId: string;

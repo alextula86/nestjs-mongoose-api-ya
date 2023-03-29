@@ -15,10 +15,10 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthBearerGuard } from '@src/guards';
+import { AuthBearerGuard } from '../../guards';
 
-import { UpdateLikeStatusCommentCommand } from '@src/api/likeStatus/use-cases';
-import { AddLikeStatusDTO } from '@src/api/likeStatus/dto';
+import { UpdateLikeStatusCommentCommand } from '../likeStatus/use-cases';
+import { AddLikeStatusDTO } from '../likeStatus/dto';
 
 import { UpdateCommentCommand, DeleteCommentCommand } from './use-cases';
 import { CommentQueryRepository } from './comment.query.repository';

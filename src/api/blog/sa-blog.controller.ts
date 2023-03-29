@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthdBasicGuard } from '@src/guards';
-import { ResponseViewModelDetail } from '@src/types';
+import { AuthdBasicGuard } from '../../guards';
+import { ResponseViewModelDetail } from '../../types';
 
 import { BindWithUserBlogCommand } from './use-cases';
 import { BlogQueryRepository } from './blog.query.repository';

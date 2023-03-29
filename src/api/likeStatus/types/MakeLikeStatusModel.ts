@@ -1,4 +1,4 @@
-import { LikeStatuses, PageType } from '@src/types';
+import { LikeStatuses, PageType } from '../../../types';
 
 export type MakeLikeStatusModel = {
   parentId: string;

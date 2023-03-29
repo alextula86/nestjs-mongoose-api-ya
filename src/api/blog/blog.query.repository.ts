@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { ResponseViewModelDetail, SortDirection } from '@src/types';
+import { ResponseViewModelDetail, SortDirection } from '../../types';
 
 import { Blog, BlogDocument, BlogModelType } from './schemas';
 import { QueryBlogModel, BlogViewModel } from './types';

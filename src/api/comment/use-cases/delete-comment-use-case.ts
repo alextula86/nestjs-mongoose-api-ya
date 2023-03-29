@@ -2,9 +2,9 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-import { PageType } from '@src/types';
+import { PageType } from '../../../types';
 
-import { LikeStatusRepository } from '@src/api/likeStatus/likeStatus.repository';
+import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';
 
 import { CommentRepository } from '../comment.repository';
 

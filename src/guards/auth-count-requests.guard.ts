@@ -9,12 +9,12 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { Request } from 'express';
 
-import { SessionService } from '@src/api/session/session.service';
+import { SessionService } from '../api/session/session.service';
 import {
   CreateSessionCommand,
   IncreaseAttemptSessionCommand,
   ResetAttemptSessionCommand,
-} from '@src/api/session/use-cases';
+} from '../api/session/use-cases';
 
 @Injectable()
 export class AuthCountRequestsGuard implements CanActivate {

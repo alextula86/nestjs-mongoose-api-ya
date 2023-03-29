@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import { LikeStatuses } from '@src/types';
+import { LikeStatuses } from '../../../types';
 
 export class AddLikeStatusDTO {
   @IsNotEmpty({

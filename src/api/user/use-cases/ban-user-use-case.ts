@@ -1,9 +1,9 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { validateOrRejectModel } from '@src/validate';
+import { validateOrRejectModel } from '../../../validate';
 
-import { DeviceRepository } from '@src/api/device/device.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 import { UserRepository } from '../user.repository';
 import { BanUserDto } from '../dto/user.dto';

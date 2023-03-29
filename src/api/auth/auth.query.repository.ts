@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { User, UserDocument, UserModelType } from '@src/api/user/schemas';
+import { User, UserDocument, UserModelType } from '../user/schemas';
 
 import { UserAuthViewModel } from './types';
 

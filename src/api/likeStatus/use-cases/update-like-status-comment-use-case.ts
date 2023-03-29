@@ -2,11 +2,11 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-import { validateOrRejectModel } from '@src/validate';
-import { LikeStatuses, PageType } from '@src/types';
+import { validateOrRejectModel } from '../../../validate';
+import { LikeStatuses, PageType } from '../../../types';
 
-import { UserRepository } from '@src/api/user/user.repository';
-import { CommentRepository } from '@src/api/comment/comment.repository';
+import { UserRepository } from '../../user/user.repository';
+import { CommentRepository } from '../../comment/comment.repository';
 
 import { LikeStatusRepository } from '../likeStatus.repository';
 import { AddLikeStatusDTO } from '../dto/likeStatus.dto';

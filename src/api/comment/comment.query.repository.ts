@@ -6,9 +6,9 @@ import {
   PageType,
   ResponseViewModelDetail,
   SortDirection,
-} from '@src/types';
+} from '../../types';
 
-import { LikeStatus, LikeStatusModelType } from '@src/api/likeStatus/schemas';
+import { LikeStatus, LikeStatusModelType } from '../likeStatus/schemas';
 
 import { Comment, CommentModelType } from './schemas';
 import { CommentViewModel, QueryCommentModel } from './types';

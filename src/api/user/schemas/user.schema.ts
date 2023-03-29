@@ -3,8 +3,8 @@ import { add } from 'date-fns';
 import { trim } from 'lodash';
 import { HydratedDocument, Model } from 'mongoose';
 
-import { bcryptService, jwtService } from '@src/application';
-import { generateUUID } from '@src/utils';
+import { bcryptService, jwtService } from '../../../application';
+import { generateUUID } from '../../../utils';
 
 import { AccountDataSchema } from './accountData.schema';
 import { EmailConfirmationSchema } from './emailConfirmation.schema';

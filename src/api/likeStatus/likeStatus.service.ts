@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { LikeStatuses, PageType } from '@src/types';
+import { LikeStatuses, PageType } from '../../types';
 
 import { LikeStatusRepository } from './likeStatus.repository';
 

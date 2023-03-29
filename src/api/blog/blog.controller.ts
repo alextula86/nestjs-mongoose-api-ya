@@ -10,11 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { AuthBearerGuard } from '@src/guards';
-import { ResponseViewModelDetail } from '@src/types';
+import { AuthBearerGuard } from '../../guards';
+import { ResponseViewModelDetail } from '../../types';
 
-import { PostQueryRepository } from '@src/api/post/post.query.repository';
-import { PostViewModel, QueryPostModel } from '@src/api/post/types';
+import { PostQueryRepository } from '../post/post.query.repository';
+import { PostViewModel, QueryPostModel } from '../post/types';
 
 import { BlogService } from './blog.service';
 import { BlogQueryRepository } from './blog.query.repository';
