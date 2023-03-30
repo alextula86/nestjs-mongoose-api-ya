@@ -1,7 +1,10 @@
-import { SortDirection } from '../../../types';
+import { BanStatuses, SortDirection } from '../../../types';
 
 export type QueryUserModel = {
   /**
+   * @query {BanStatuses} banStatus
+   * @summary Available values : all, banned, notBanned
+   *
    * @query {String} searchLoginTerm
    * @summary Search term for user Login: Login should contains this term in any position
    *
@@ -21,6 +24,7 @@ export type QueryUserModel = {
    * @summary Available values: asc, desc. Default value: desc
    */
 
+  banStatus: BanStatuses;
   searchLoginTerm: string;
   searchEmailTerm: string;
   pageNumber: string;

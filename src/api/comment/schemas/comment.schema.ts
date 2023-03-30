@@ -49,6 +49,12 @@ export class Comment {
   userLogin: string;
 
   @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isBanned: boolean;
+
+  @Prop({
     type: String,
     required: [true, 'The createdAt field is required'],
     trim: true,

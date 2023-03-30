@@ -30,7 +30,7 @@ export class SABlogController {
   // Получение списка блогеров
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAllBlogs(
+  async findAllBlogsForAdmin(
     @Query()
     {
       searchNameTerm,
@@ -40,13 +40,14 @@ export class SABlogController {
       sortDirection,
     }: QueryBlogModel,
   ): Promise<ResponseViewModelDetail<BlogViewModel>> {
-    const allBlogsByUserId = await this.blogQueryRepository.findAllBlogs({
-      searchNameTerm,
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-    });
+    const allBlogsByUserId =
+      await this.blogQueryRepository.findAllBlogsForAdmin({
+        searchNameTerm,
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+      });
 
     return allBlogsByUserId;
   }

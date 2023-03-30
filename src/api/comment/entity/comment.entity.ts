@@ -5,6 +5,7 @@ export class CommentEntity {
   createdAt: string;
   likesCount: number;
   dislikesCount: number;
+  isBanned: boolean;
   constructor(
     public content: string,
     public postId: string,
@@ -14,6 +15,7 @@ export class CommentEntity {
     this.id = getNextStrId();
     this.likesCount = 0;
     this.dislikesCount = 0;
+    this.isBanned = false;
     this.createdAt = new Date().toISOString();
   }
 }

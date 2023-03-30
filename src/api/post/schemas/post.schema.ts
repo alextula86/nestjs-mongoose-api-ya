@@ -116,6 +116,12 @@ export class Post extends Document {
   @Prop({ type: [NewestLikesSchema], default: [] })
   newestLikes: NewestLikesEntity[];
 
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isBanned: boolean;
+
   setTitle(title: string) {
     if (!trim(title)) {
       throw new Error('The title field is required');

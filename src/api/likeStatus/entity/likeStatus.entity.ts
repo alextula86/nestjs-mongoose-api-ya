@@ -3,6 +3,7 @@ import { LikeStatuses, PageType } from '../../../types';
 
 export class LikeStatusEntity {
   id: string;
+  isBanned: boolean;
   createdAt: string;
   constructor(
     public parentId: string,
@@ -12,6 +13,7 @@ export class LikeStatusEntity {
     public pageType: PageType,
   ) {
     this.id = getNextStrId();
+    this.isBanned = false;
     this.createdAt = new Date().toISOString();
   }
 }

@@ -33,7 +33,9 @@ export class CommentQueryRepository {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
-    const filter: any = { postId: { $eq: postId } };
+    const filter: any = {
+      $and: [{ postId: { $eq: postId } }, { isBanned: { $eq: false } }],
+    };
     const sort: any = {
       [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1,
     };
@@ -54,7 +56,7 @@ export class CommentQueryRepository {
           userId,
           pageType: PageType.COMMENT,
         });
-
+        console.log('comment', comment);
         return {
           id: comment.id,
           content: comment.content,
@@ -87,7 +89,10 @@ export class CommentQueryRepository {
     commentId: string,
     userId: string,
   ): Promise<CommentViewModel | null> {
-    const foundComment = await this.CommentModel.findOne({ id: commentId });
+    const foundComment = await this.CommentModel.findOne({
+      id: commentId,
+      isBanned: false,
+    });
 
     if (!foundComment) {
       return null;

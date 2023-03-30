@@ -8,6 +8,7 @@ export class PostEntity {
   likesCount: number;
   dislikesCount: number;
   newestLikes: NewestLikesEntity[];
+  isBanned: boolean;
   constructor(
     public title: string,
     public shortDescription: string,
@@ -19,6 +20,7 @@ export class PostEntity {
     this.likesCount = 0;
     this.dislikesCount = 0;
     this.newestLikes = [];
+    this.isBanned = false;
     this.createdAt = new Date().toISOString();
   }
 }

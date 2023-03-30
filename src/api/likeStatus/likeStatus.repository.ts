@@ -98,4 +98,16 @@ export class LikeStatusRepository {
 
     return deletedCount === 1;
   }
+  // Бан лайков пользователя
+  async banUserLikeStatuses(
+    userId: string,
+    isBanned: boolean,
+  ): Promise<boolean> {
+    const { modifiedCount } = await this.LikeStatusModel.updateMany(
+      { userId },
+      { $set: { isBanned } },
+    );
+
+    return modifiedCount > 0;
+  }
 }

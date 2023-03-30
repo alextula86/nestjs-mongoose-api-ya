@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ResponseViewModelDetail, SortDirection } from '../../types';
 
 import { Blog, BlogDocument, BlogModelType } from './schemas';
-import { QueryBlogModel, BlogViewModel } from './types';
+import { QueryBlogModel, BlogViewModel, BlogViewAdminModel } from './types';
 
 @Injectable()
 export class BlogQueryRepository {
@@ -93,6 +93,42 @@ export class BlogQueryRepository {
 
     return this._getBlogViewModel(foundBlog);
   }
+  async findAllBlogsForAdmin({
+    searchNameTerm,
+    pageNumber,
+    pageSize,
+    sortBy = 'createdAt',
+    sortDirection = SortDirection.DESC,
+  }: QueryBlogModel): Promise<ResponseViewModelDetail<BlogViewAdminModel>> {
+    const number = pageNumber ? Number(pageNumber) : 1;
+    const size = pageSize ? Number(pageSize) : 10;
+
+    const filter: any = {};
+    const sort: any = {
+      [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1,
+    };
+
+    if (searchNameTerm) {
+      filter.name = { $regex: searchNameTerm, $options: 'i' };
+    }
+
+    const totalCount = await this.BlogModel.countDocuments(filter);
+    const pagesCount = Math.ceil(totalCount / size);
+    const skip = (number - 1) * size;
+
+    const blogs = await this.BlogModel.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(size);
+
+    return this._getBlogsViewAdminModelDetail({
+      items: blogs,
+      totalCount,
+      pagesCount,
+      page: number,
+      pageSize: size,
+    });
+  }
   _getBlogViewModel(blogDocument: BlogDocument): BlogViewModel {
     return {
       id: blogDocument.id,
@@ -122,6 +158,32 @@ export class BlogQueryRepository {
         websiteUrl: item.websiteUrl,
         isMembership: item.isMembership,
         createdAt: item.createdAt,
+      })),
+    };
+  }
+  _getBlogsViewAdminModelDetail({
+    items,
+    totalCount,
+    pagesCount,
+    page,
+    pageSize,
+  }: ResponseViewModelDetail<BlogDocument>): ResponseViewModelDetail<BlogViewAdminModel> {
+    return {
+      pagesCount,
+      page,
+      pageSize,
+      totalCount,
+      items: items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        websiteUrl: item.websiteUrl,
+        isMembership: item.isMembership,
+        createdAt: item.createdAt,
+        blogOwnerInfo: {
+          userId: item.userId,
+          userLogin: item.userLogin,
+        },
       })),
     };
   }

@@ -4,6 +4,7 @@ export class BlogEntity {
   id: string;
   createdAt: string;
   isMembership: boolean;
+  isBanned: boolean;
   constructor(
     public name: string,
     public description: string,
@@ -13,6 +14,7 @@ export class BlogEntity {
   ) {
     this.id = getNextStrId();
     this.isMembership = false;
+    this.isBanned = false;
     this.createdAt = new Date().toISOString();
   }
 }

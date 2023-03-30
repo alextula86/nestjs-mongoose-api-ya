@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isEmpty } from 'lodash';
 
-import { ResponseViewModelDetail, SortDirection } from '../../types';
+import {
+  ResponseViewModelDetail,
+  SortDirection,
+  BanStatuses,
+} from '../../types';
 
 import { User, UserDocument, UserModelType } from './schemas';
 import { QueryUserModel, UserViewModel } from './types';
@@ -11,6 +15,7 @@ import { QueryUserModel, UserViewModel } from './types';
 export class UserQueryRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
   async findAllUsers({
+    banStatus = BanStatuses.All,
     searchLoginTerm,
     searchEmailTerm,
     pageNumber,
@@ -35,6 +40,18 @@ export class UserQueryRepository {
     if (searchEmailTerm) {
       query.push({
         'accountData.email': { $regex: searchEmailTerm, $options: 'i' },
+      });
+    }
+
+    if (banStatus === BanStatuses.BANNED) {
+      query.push({
+        'banInfo.isBanned': { $eq: true },
+      });
+    }
+
+    if (banStatus === BanStatuses.NOTBANNED) {
+      query.push({
+        'banInfo.isBanned': { $eq: false },
       });
     }
 

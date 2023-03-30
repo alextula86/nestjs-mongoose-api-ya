@@ -58,9 +58,15 @@ export class Blog {
 
   @Prop({
     type: Boolean,
-    required: [true, 'The isMembership field is required'],
+    default: false,
   })
   isMembership: boolean;
+
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isBanned: boolean;
 
   @Prop({
     type: String,
