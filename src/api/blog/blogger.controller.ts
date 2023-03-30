@@ -22,7 +22,7 @@ import { ResponseViewModelDetail } from '../../types';
 
 import {
   CreatePostsCommand,
-  UpdatePostCommand,
+  // UpdatePostCommand,
   DeletePostCommand,
 } from '../post/use-cases';
 import { PostQueryRepository } from '../post/post.query.repository';
@@ -174,7 +174,7 @@ export class BloggerController {
     // Возвращаем созданный пост
     return foundPost;
   }
-  // Обновление поста
+  /*// Обновление поста
   @Put(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
@@ -199,7 +199,7 @@ export class BloggerController {
     if (statusCode === HttpStatus.FORBIDDEN) {
       throw new ForbiddenException();
     }
-  }
+  }*/
   // Удаление поста
   @Delete(':blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
