@@ -57,6 +57,20 @@ export class CommentQueryRepository {
           pageType: PageType.COMMENT,
         });
 
+        const likesCount = await this.LikeStatusModel.countDocuments({
+          parentId: comment.id,
+          pageType: PageType.COMMENT,
+          likeStatus: LikeStatuses.LIKE,
+          isBanned: false,
+        });
+
+        const dislikesCount = await this.LikeStatusModel.countDocuments({
+          parentId: comment.id,
+          pageType: PageType.COMMENT,
+          likeStatus: LikeStatuses.DISLIKE,
+          isBanned: false,
+        });
+
         return {
           id: comment.id,
           content: comment.content,
@@ -66,8 +80,10 @@ export class CommentQueryRepository {
           },
           createdAt: comment.createdAt,
           likesInfo: {
-            likesCount: comment.likesCount,
-            dislikesCount: comment.dislikesCount,
+            // likesCount: comment.likesCount,
+            // dislikesCount: comment.dislikesCount,
+            likesCount: likesCount,
+            dislikesCount: dislikesCount,
             myStatus: foundLikeStatus
               ? foundLikeStatus.likeStatus
               : LikeStatuses.NONE,
@@ -104,6 +120,20 @@ export class CommentQueryRepository {
       pageType: PageType.COMMENT,
     });
 
+    const likesCount = await this.LikeStatusModel.countDocuments({
+      parentId: foundComment.id,
+      pageType: PageType.COMMENT,
+      likeStatus: LikeStatuses.LIKE,
+      isBanned: false,
+    });
+
+    const dislikesCount = await this.LikeStatusModel.countDocuments({
+      parentId: foundComment.id,
+      pageType: PageType.COMMENT,
+      likeStatus: LikeStatuses.DISLIKE,
+      isBanned: false,
+    });
+
     return {
       id: foundComment.id,
       content: foundComment.content,
@@ -113,8 +143,10 @@ export class CommentQueryRepository {
       },
       createdAt: foundComment.createdAt,
       likesInfo: {
-        likesCount: foundComment.likesCount,
-        dislikesCount: foundComment.dislikesCount,
+        // likesCount: foundComment.likesCount,
+        // dislikesCount: foundComment.dislikesCount,
+        likesCount: likesCount,
+        dislikesCount: dislikesCount,
         myStatus: foundLikeStatus
           ? foundLikeStatus.likeStatus
           : LikeStatuses.NONE,
