@@ -165,7 +165,7 @@ const adapters = [EmailManager, EmailAdapter];
     MongooseModule.forRoot(
       process.env.MONGO_ATLAS_URI || 'mongodb://127.0.0.1/bloggers',
     ),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    /*MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
@@ -173,7 +173,7 @@ const adapters = [EmailManager, EmailAdapter];
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     MongooseModule.forFeature([
       { name: LikeStatus.name, schema: LikeStatusSchema },
-    ]),
+    ]),*/
     MailerModule.forRoot({
       transport: {
         service: 'gmail',
@@ -190,18 +190,18 @@ const adapters = [EmailManager, EmailAdapter];
   ],
   controllers: [
     AppController,
-    AuthController,
-    UserController,
-    BlogController,
-    SABlogController,
-    PostController,
-    CommentController,
-    DeviceController,
-    TestingController,
+    // AuthController,
+    // UserController,
+    // BlogController,
+    // SABlogController,
+    // PostController,
+    // CommentController,
+    // DeviceController,
+    // TestingController,
   ],
   providers: [
     AppService,
-    ...authProviders,
+    /*...authProviders,
     ...userProviders,
     ...blogProviders,
     ...postProviders,
@@ -209,10 +209,10 @@ const adapters = [EmailManager, EmailAdapter];
     ...deviceProviders,
     ...sessionSProviders,
     ...likeStatusSProviders,
-    ...adapters,
+    ...adapters,*/
   ],
   exports: [
-    BlogService,
+    /*BlogService,
     BlogRepository,
     BlogQueryRepository,
 
@@ -232,7 +232,7 @@ const adapters = [EmailManager, EmailAdapter];
     SessionRepository,
 
     LikeStatusService,
-    LikeStatusRepository,
+    LikeStatusRepository,*/
   ],
 })
 export class AppModule {}
