@@ -4,7 +4,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 
 import { IsBlogExistConstraint } from './custom-validators/customValidateBlog';
 import { BlogController } from './blog.controller';
-// import { BloggerController } from './blogger.controller';
 import { SABlogController } from './sa-blog.controller';
 import { BlogService } from './blog.service';
 import {
@@ -29,7 +28,6 @@ const useCases = [
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     CqrsModule,
   ],
-  // controllers: [BlogController, BloggerController, SABlogController],
   controllers: [BlogController, SABlogController],
   providers: [
     BlogService,

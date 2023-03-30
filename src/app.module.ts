@@ -17,7 +17,6 @@ import { LikeStatus, LikeStatusSchema } from './api/likeStatus/schemas';
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
 import { BlogController } from './api/blog/blog.controller';
-// import { BloggerController } from './api/blog/blogger.controller';
 import { SABlogController } from './api/blog/sa-blog.controller';
 import { PostController } from './api/post/post.controller';
 import { DeviceController } from './api/device/device.controller';
@@ -194,7 +193,6 @@ const adapters = [EmailManager, EmailAdapter];
     AuthController,
     UserController,
     BlogController,
-    // BloggerController,
     SABlogController,
     PostController,
     CommentController,
