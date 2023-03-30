@@ -52,12 +52,12 @@ export class CommentRepository {
     return deletedCount === 1;
   }
   // Бан комментариев пользователя
-  /*async banUserComments(userId: string, isBanned: boolean): Promise<boolean> {
+  async banUserComments(userId: string, isBanned: boolean): Promise<boolean> {
     const { modifiedCount } = await this.CommentModel.updateMany(
       { userId },
       { $set: { isBanned } },
     );
 
     return modifiedCount > 0;
-  }*/
+  }
 }

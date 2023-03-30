@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-// import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-// import { MailerModule } from '@nestjs-modules/mailer';
-// import { CqrsModule } from '@nestjs/cqrs';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { CqrsModule } from '@nestjs/cqrs';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-/*import { User, UserSchema } from './api/user/schemas';
+import { User, UserSchema } from './api/user/schemas';
 import { Blog, BlogSchema } from './api/blog/schemas';
 import { Post, PostSchema } from './api/post/schemas';
 import { Comment, CommentSchema } from './api/comment/schemas';
@@ -17,6 +17,7 @@ import { LikeStatus, LikeStatusSchema } from './api/likeStatus/schemas';
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
 import { BlogController } from './api/blog/blog.controller';
+import { BloggerController } from './api/blog/blogger.controller';
 import { SABlogController } from './api/blog/sa-blog.controller';
 import { PostController } from './api/post/post.controller';
 import { DeviceController } from './api/device/device.controller';
@@ -73,7 +74,7 @@ import {
   UpdateLikeStatusPostUseCase,
 } from './api/likeStatus/use-cases';
 
-/*import { UserRepository } from './api/user/user.repository';
+import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
 import { PostRepository } from './api/post/post.repository';
 import { CommentRepository } from './api/comment/comment.repository';
@@ -90,8 +91,8 @@ import { AuthQueryRepository } from './api/auth/auth.query.repository';
 
 import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
-import { IsBlogExistConstraint } from './api/blog/custom-validators/customValidateBlog';*/
-/*
+import { IsBlogExistConstraint } from './api/blog/custom-validators/customValidateBlog';
+
 const authProviders = [
   AuthService,
   AuthQueryRepository,
@@ -158,14 +159,14 @@ const likeStatusSProviders = [
   UpdateLikeStatusPostUseCase,
 ];
 const adapters = [EmailManager, EmailAdapter];
-*/
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    /*MongooseModule.forRoot(
+    MongooseModule.forRoot(
       process.env.MONGO_ATLAS_URI || 'mongodb://127.0.0.1/bloggers',
     ),
-    /*MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
@@ -173,8 +174,8 @@ const adapters = [EmailManager, EmailAdapter];
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     MongooseModule.forFeature([
       { name: LikeStatus.name, schema: LikeStatusSchema },
-    ]),*/
-    /*MailerModule.forRoot({
+    ]),
+    MailerModule.forRoot({
       transport: {
         service: 'gmail',
         auth: {
@@ -186,22 +187,23 @@ const adapters = [EmailManager, EmailAdapter];
         from: '"nestjs-video-api" <a.marcuk2023@gmail.com>',
       },
     }),
-    CqrsModule,*/
+    CqrsModule,
   ],
   controllers: [
     AppController,
-    // AuthController,
-    // UserController,
-    // BlogController,
-    // SABlogController,
-    // PostController,
-    // CommentController,
-    // DeviceController,
-    // TestingController,
+    AuthController,
+    UserController,
+    BlogController,
+    BloggerController,
+    SABlogController,
+    PostController,
+    CommentController,
+    DeviceController,
+    TestingController,
   ],
   providers: [
     AppService,
-    /*...authProviders,
+    ...authProviders,
     ...userProviders,
     ...blogProviders,
     ...postProviders,
@@ -209,10 +211,10 @@ const adapters = [EmailManager, EmailAdapter];
     ...deviceProviders,
     ...sessionSProviders,
     ...likeStatusSProviders,
-    ...adapters,*/
+    ...adapters,
   ],
   exports: [
-    /*BlogService,
+    BlogService,
     BlogRepository,
     BlogQueryRepository,
 
@@ -232,7 +234,7 @@ const adapters = [EmailManager, EmailAdapter];
     SessionRepository,
 
     LikeStatusService,
-    LikeStatusRepository,*/
+    LikeStatusRepository,
   ],
 })
 export class AppModule {}

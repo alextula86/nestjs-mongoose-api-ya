@@ -4,8 +4,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { validateOrRejectModel } from '../../../validate';
 
 import { DeviceRepository } from '../../device/device.repository';
-// import { CommentRepository } from '../../comment/comment.repository';
-// import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';
+import { CommentRepository } from '../../comment/comment.repository';
+import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';
 
 import { UserRepository } from '../user.repository';
 import { BanUserDto } from '../dto/user.dto';
@@ -18,8 +18,9 @@ export class BanUserCommand {
 export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly deviceRepository: DeviceRepository /*private readonly commentRepository: CommentRepository, 
-    private readonly likeStatusRepository: LikeStatusRepository,*/,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly commentRepository: CommentRepository,
+    private readonly likeStatusRepository: LikeStatusRepository,
   ) {}
   // Бан пользователя
   async execute(command: BanUserCommand): Promise<{
@@ -41,9 +42,9 @@ export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
     // Сохраняем в базу
     await this.userRepository.save(foundUserById);
     // Банним комментарии пользователя
-    // await this.commentRepository.banUserComments(userId, isBanned);
+    await this.commentRepository.banUserComments(userId, isBanned);
     // Банним лайк статусы пользователя
-    // await this.likeStatusRepository.banUserLikeStatuses(userId, isBanned);
+    await this.likeStatusRepository.banUserLikeStatuses(userId, isBanned);
     // Удаляем все устройства пользователя
     await this.deviceRepository.deleteAllUserDevices(userId);
     // Возвращаем статус 204

@@ -99,7 +99,7 @@ export class LikeStatusRepository {
     return deletedCount === 1;
   }
   // Бан лайков пользователя
-  /*async banUserLikeStatuses(
+  async banUserLikeStatuses(
     userId: string,
     isBanned: boolean,
   ): Promise<boolean> {
@@ -109,5 +109,5 @@ export class LikeStatusRepository {
     );
 
     return modifiedCount > 0;
-  }*/
+  }
 }
