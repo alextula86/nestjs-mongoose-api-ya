@@ -56,7 +56,7 @@ export class CommentQueryRepository {
           userId,
           pageType: PageType.COMMENT,
         });
-        console.log('comment', comment);
+
         return {
           id: comment.id,
           content: comment.content,
