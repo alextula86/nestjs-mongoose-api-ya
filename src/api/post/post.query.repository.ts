@@ -164,6 +164,20 @@ export class PostQueryRepository {
           .sort({ createdAt: -1 })
           .limit(3);
 
+        const likesCount = await this.LikeStatusModel.countDocuments({
+          parentId: post.id,
+          pageType: PageType.POST,
+          likeStatus: LikeStatuses.LIKE,
+          isBanned: false,
+        });
+
+        const dislikesCount = await this.LikeStatusModel.countDocuments({
+          parentId: post.id,
+          pageType: PageType.POST,
+          likeStatus: LikeStatuses.DISLIKE,
+          isBanned: false,
+        });
+
         return {
           id: post.id,
           title: post.title,
@@ -173,8 +187,10 @@ export class PostQueryRepository {
           blogName: post.blogName,
           createdAt: post.createdAt,
           extendedLikesInfo: {
-            likesCount: post.likesCount,
-            dislikesCount: post.dislikesCount,
+            // likesCount: post.likesCount,
+            // dislikesCount: post.dislikesCount,
+            likesCount: likesCount,
+            dislikesCount: dislikesCount,
             myStatus: foundLikeStatus
               ? foundLikeStatus.likeStatus
               : LikeStatuses.NONE,
@@ -221,6 +237,20 @@ export class PostQueryRepository {
       .sort({ createdAt: -1 })
       .limit(3);
 
+    const likesCount = await this.LikeStatusModel.countDocuments({
+      parentId: foundPost.id,
+      pageType: PageType.POST,
+      likeStatus: LikeStatuses.LIKE,
+      isBanned: false,
+    });
+
+    const dislikesCount = await this.LikeStatusModel.countDocuments({
+      parentId: foundPost.id,
+      pageType: PageType.POST,
+      likeStatus: LikeStatuses.DISLIKE,
+      isBanned: false,
+    });
+
     return {
       id: foundPost.id,
       title: foundPost.title,
@@ -230,8 +260,10 @@ export class PostQueryRepository {
       blogName: foundPost.blogName,
       createdAt: foundPost.createdAt,
       extendedLikesInfo: {
-        likesCount: foundPost.likesCount,
-        dislikesCount: foundPost.dislikesCount,
+        // likesCount: foundPost.likesCount,
+        //  dislikesCount: foundPost.dislikesCount,
+        likesCount: likesCount,
+        dislikesCount: dislikesCount,
         myStatus: foundLikeStatusByUserId
           ? foundLikeStatusByUserId.likeStatus
           : LikeStatuses.NONE,
