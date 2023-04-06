@@ -33,7 +33,7 @@ export class PostQueryRepository {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
-    const filter: any = {};
+    const filter: any = { isBanned: false };
     const sort: any = {
       [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1,
     };
@@ -63,6 +63,7 @@ export class PostQueryRepository {
           parentId: post.id,
           likeStatus: LikeStatuses.LIKE,
           pageType: PageType.POST,
+          isBanned: false,
         })
           .sort({ createdAt: -1 })
           .limit(3);
@@ -130,7 +131,9 @@ export class PostQueryRepository {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
-    const filter: any = { blogId: { $eq: blogId } };
+    const filter: any = {
+      $and: [{ blogId: { $eq: blogId } }, { isBanned: false }],
+    };
     const sort: any = {
       [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1,
     };
@@ -160,6 +163,7 @@ export class PostQueryRepository {
           parentId: post.id,
           likeStatus: LikeStatuses.LIKE,
           pageType: PageType.POST,
+          isBanned: false,
         })
           .sort({ createdAt: -1 })
           .limit(3);
@@ -217,7 +221,10 @@ export class PostQueryRepository {
     postId: string,
     userId: string,
   ): Promise<PostViewModel | null> {
-    const foundPost = await this.PostModel.findOne({ id: postId });
+    const foundPost = await this.PostModel.findOne({
+      id: postId,
+      isBanned: false,
+    });
 
     if (!foundPost) {
       return null;
@@ -233,6 +240,7 @@ export class PostQueryRepository {
       parentId: foundPost.id,
       likeStatus: LikeStatuses.LIKE,
       pageType: PageType.POST,
+      isBanned: false,
     })
       .sort({ createdAt: -1 })
       .limit(3);

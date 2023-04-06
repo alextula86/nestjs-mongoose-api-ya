@@ -1,4 +1,6 @@
-export type BlogOwnerInfoType = {
+import { BanInfoType } from '../../../types';
+
+type BlogOwnerInfoType = {
   userId: string;
   userLogin: string;
 };
@@ -11,4 +13,5 @@ export type BlogViewAdminModel = {
   isMembership: boolean;
   createdAt: string;
   blogOwnerInfo: BlogOwnerInfoType;
+  banInfo: BanInfoType;
 };

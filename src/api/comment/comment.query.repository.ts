@@ -11,7 +11,11 @@ import {
 import { LikeStatus, LikeStatusModelType } from '../likeStatus/schemas';
 
 import { Comment, CommentModelType } from './schemas';
-import { CommentViewModel, QueryCommentModel } from './types';
+import {
+  CommentViewModel,
+  QueryCommentModel,
+  CommentByPostViewModel,
+} from './types';
 
 @Injectable()
 export class CommentQueryRepository {
@@ -80,8 +84,6 @@ export class CommentQueryRepository {
           },
           createdAt: comment.createdAt,
           likesInfo: {
-            // likesCount: comment.likesCount,
-            // dislikesCount: comment.dislikesCount,
             likesCount: likesCount,
             dislikesCount: dislikesCount,
             myStatus: foundLikeStatus
@@ -98,6 +100,77 @@ export class CommentQueryRepository {
       page: number,
       pageSize: size,
       items: commentsViewModel,
+    };
+  }
+  async findCommentsByAllPosts({
+    pageNumber,
+    pageSize,
+    sortBy = 'createdAt',
+    sortDirection = SortDirection.DESC,
+  }: QueryCommentModel): Promise<
+    ResponseViewModelDetail<CommentByPostViewModel>
+  > {
+    const number = pageNumber ? Number(pageNumber) : 1;
+    const size = pageSize ? Number(pageSize) : 10;
+    // const totalCount = await this.CommentModel.countDocuments();
+    // const pagesCount = Math.ceil(totalCount / size);
+    const skip = (number - 1) * size;
+
+    /*const comments = await this.CommentModel.aggregate([
+      { $sort: { [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1 } },
+      { $skip: skip },
+      { $limit: size },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: 'postId',
+          foreignField: 'id',
+          as: 'post',
+        },
+      },
+      { $unwind: '$post' },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          content: 1,
+          createdAt: 1,
+          commentatorInfo: {
+            userId: '$userId',
+            userLogin: '$userLogin',
+          },
+          postInfo: {
+            id: '$post.id',
+            title: '$post.title',
+            blogId: '$post.blogId',
+            blogName: '$post.blogName',
+          },
+        },
+      },
+    ]);*/
+
+    return {
+      pagesCount: 1,
+      totalCount: 10,
+      page: number,
+      pageSize: size,
+      items: [
+        {
+          id: '1',
+          content: '1',
+          createdAt: '1',
+          commentatorInfo: {
+            userId: '$userId',
+            userLogin: '$userLogin',
+          },
+          postInfo: {
+            id: '$post.id',
+            title: '$post.title',
+            blogId: '$post.blogId',
+            blogName: '$post.blogName',
+          },
+        },
+      ],
     };
   }
   // Поиск комментария по его идентификатору
@@ -143,8 +216,6 @@ export class CommentQueryRepository {
       },
       createdAt: foundComment.createdAt,
       likesInfo: {
-        // likesCount: foundComment.likesCount,
-        // dislikesCount: foundComment.dislikesCount,
         likesCount: likesCount,
         dislikesCount: dislikesCount,
         myStatus: foundLikeStatus

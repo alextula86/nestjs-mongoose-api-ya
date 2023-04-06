@@ -28,9 +28,11 @@ export class PostRepository {
     content,
     blogId,
     blogName,
+    userId,
+    userLogin,
   }: MakePostModel): Promise<PostDocument> {
     const madePost = this.PostModel.make(
-      { title, shortDescription, content, blogId, blogName },
+      { title, shortDescription, content, blogId, blogName, userId, userLogin },
       this.PostModel,
     );
 
@@ -47,5 +49,14 @@ export class PostRepository {
     const { deletedCount } = await this.PostModel.deleteMany({});
 
     return deletedCount === 1;
+  }
+  // Бан постов блогера
+  async banPostsByBlogId(blogId: string, isBanned: boolean): Promise<boolean> {
+    const { modifiedCount } = await this.PostModel.updateMany(
+      { blogId },
+      { $set: { isBanned } },
+    );
+
+    return modifiedCount > 0;
   }
 }

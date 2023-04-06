@@ -29,25 +29,36 @@ import { PostQueryRepository } from '../post/post.query.repository';
 import { CreatePostDto, UpdatePostDto } from '../post/dto/post.dto';
 import { PostViewModel } from '../post/types';
 
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+import { QueryCommentModel, CommentByPostViewModel } from '../comment/types';
+
+import { BanQueryRepository } from '../ban/ban.query.repository';
+import { QueryVannedUserModel, BannedUserViewModel } from '../ban/types';
+
 import {
   CreateBlogCommand,
   DeleteBlogCommand,
   UpdateBlogCommand,
+  BanUserForBlogCommand,
 } from './use-cases';
+import { BlogService } from './blog.service';
 import { BlogQueryRepository } from './blog.query.repository';
-import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
+import { BanUserDto, CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { BlogViewModel, QueryBlogModel } from './types';
 
 @UseGuards(AuthBearerGuard)
-@Controller('api/blogger/blogs')
+@Controller('api/blogger')
 export class BloggerController {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly blogService: BlogService,
     private readonly blogQueryRepository: BlogQueryRepository,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly commentQueryRepository: CommentQueryRepository,
+    private readonly banQueryRepository: BanQueryRepository,
   ) {}
   // Получение списка блогеров привязанных к пользователю
-  @Get()
+  @Get('blogs')
   @HttpCode(HttpStatus.OK)
   async findAllBlogs(
     @Req() request: Request & { userId: string },
@@ -71,8 +82,41 @@ export class BloggerController {
 
     return allBlogsByUserId;
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('blogs/comments')
+  async findCommentsByAllPosts(
+    @Query()
+    { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
+  //): Promise<ResponseViewModelDetail<CommentByPostViewModel>> {
+  ): Promise<any> {
+    /*const commentsByAllPosts =
+        await this.commentQueryRepository.findCommentsByAllPosts({
+          pageNumber,
+          pageSize,
+          sortBy,
+          sortDirection,
+        });*/
+
+    return {
+      id: '1',
+      content: '1',
+      createdAt: '1',
+      commentatorInfo: {
+        userId: '$userId',
+        userLogin: '$userLogin',
+      },
+      postInfo: {
+        id: '$post.id',
+        title: '$post.title',
+        blogId: '$post.blogId',
+        blogName: '$post.blogName',
+      },
+    };
+  }
+
   // Создание блогера
-  @Post()
+  @Post('blogs')
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
     @Req() request: Request & { userId: string },
@@ -92,7 +136,7 @@ export class BloggerController {
     return foundBlog;
   }
   // Обновление блогера
-  @Put(':blogId')
+  @Put('blogs/:blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Req() request: Request & { userId: string },
@@ -118,9 +162,8 @@ export class BloggerController {
     // Возвращаем статус 204
     return true;
   }
-  // Доделать проверку юзера //
   // Удаление блогера
-  @Delete(':blogId')
+  @Delete('blogs/:blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlogById(
     @Req() request: Request & { userId: string },
@@ -146,7 +189,7 @@ export class BloggerController {
     return true;
   }
   // Создание поста
-  @Post(':blogId/posts')
+  @Post('blogs/:blogId/posts')
   @HttpCode(HttpStatus.CREATED)
   async createPostsByBlogId(
     @Req() request: Request & { userId: string },
@@ -175,7 +218,7 @@ export class BloggerController {
     return foundPost;
   }
   // Обновление поста
-  @Put(':blogId/posts/:postId')
+  @Put('blogs/:blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Req() request: Request & { userId: string },
@@ -201,7 +244,7 @@ export class BloggerController {
     }
   }
   // Удаление поста
-  @Delete(':blogId/posts/:postId')
+  @Delete('blogs/:blogId/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostById(
     @Req() request: Request & { userId: string },
@@ -225,4 +268,66 @@ export class BloggerController {
       throw new ForbiddenException();
     }
   }
+  // Получение списка забаненных пользователей для блогера
+  @Get('users/blog/:blogId')
+  @HttpCode(HttpStatus.OK)
+  async findAllBannedUsersForBlog(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+    @Query()
+    {
+      searchLoginTerm,
+      pageNumber,
+      pageSize,
+      sortBy,
+      sortDirection,
+    }: QueryVannedUserModel,
+  ): Promise<ResponseViewModelDetail<BannedUserViewModel>> {
+    // Проверяем существование блогера
+    const foundBlog = await this.blogService.findBlogById(blogId);
+    // Если блогер не существует, возвращаем ошибку 404
+    if (!foundBlog) {
+      throw new NotFoundException();
+    }
+    // Проверяем принадлежит ли блог пользователю
+    if (foundBlog.userId !== request.userId) {
+      throw new ForbiddenException();
+    }
+    // Ищем всех забаненных пользователь для конкретного блога
+    const allBannedUsersForBlog =
+      await this.banQueryRepository.findAllBannedUsersForBlog(blogId, {
+        searchLoginTerm,
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+      });
+
+    return allBannedUsersForBlog;
+  }
+  // Бан пользователя для блога
+  @Put('users/:userId/ban')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async banUserForBlog(
+    @Req() request: Request & { userId: string },
+    @Param('userId') userId: string,
+    @Body() banUserDto: BanUserDto,
+  ): Promise<void> {
+    const authUserId = request.userId;
+    // Обновляем бан пользователя для блога
+    const { statusCode } = await this.commandBus.execute(
+      new BanUserForBlogCommand(authUserId, userId, banUserDto),
+    );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    // Если блог не принадлежит авторизованному пользователю, возвращаем ошибку 403
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+  }
+  // Получение списка комментария по всем постам блогера
+  
+ 
 }

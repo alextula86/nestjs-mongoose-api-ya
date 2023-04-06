@@ -12,10 +12,11 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthBearerGuard } from '../../guards';
+import { AuthBearerGuard, AuthPublicGuard } from '../../guards';
 import { LikeStatuses, ResponseViewModelDetail } from '../../types';
 
 import { CreateCommentCommand } from '../comment/use-cases';
@@ -30,7 +31,6 @@ import { PostQueryRepository } from './post.query.repository';
 import { PostViewModel, QueryPostModel } from './types';
 import { CommentViewModel, QueryCommentModel } from '../comment/types';
 
-@UseGuards(AuthBearerGuard)
 @Controller('api/posts')
 export class PostController {
   constructor(
@@ -40,6 +40,7 @@ export class PostController {
     private readonly commentQueryRepository: CommentQueryRepository,
   ) {}
   @Get()
+  @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
   // Получение списка постов
   async findAllPosts(
@@ -68,6 +69,7 @@ export class PostController {
   }
   // Получение конкретного поста по его идентификатору
   @Get(':postId')
+  @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
   async findPostById(
     @Req() request: Request & { userId: string },
@@ -87,6 +89,7 @@ export class PostController {
   }
   // Получение списка комментариев по идентификатору поста
   @Get(':postId/comments')
+  @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
   // Получение списка постов конкретного блогера
   async findCommentsByPostId(
@@ -118,6 +121,7 @@ export class PostController {
   }
   // Создание комментария
   @Post(':postId/comments')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.CREATED)
   async createCommentsByPostId(
     @Req() request: Request & { userId: string },
@@ -134,11 +138,15 @@ export class PostController {
     if (statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException(statusMessage);
     }
-    // Если при создании комментария возникли ошибки возращаем статус ошибки 400
+    // Если при создании комментария возникли ошибки, возращаем статус ошибки 400
     if (statusCode === HttpStatus.BAD_REQUEST) {
       throw new BadRequestException(statusMessage);
     }
-
+    // Если при создании комментария пользователь не был найден или забанен,
+    // Возвращаем ошибку 403
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException(statusMessage);
+    }
     // Порлучаем созданный комментарий в формате ответа пользователю
     const foundComment = await this.commentQueryRepository.findCommentById(
       commentId,
@@ -149,6 +157,7 @@ export class PostController {
   }
   // Обновление лайк статуса поста
   @Put(':postId/like-status')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateCommentLikeStatus(
     @Req() request: Request & { userId: string },
