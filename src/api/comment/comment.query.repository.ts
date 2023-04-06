@@ -140,8 +140,8 @@ export class CommentQueryRepository {
             userLogin: '$userLogin',
           },
           likesInfo: {
-            likesCount: 0,
-            dislikesCount: 0,
+            likesCount: '0',
+            dislikesCount: '0',
             myStatus: 'None',
           },
           postInfo: {
