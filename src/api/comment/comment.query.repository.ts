@@ -139,11 +139,6 @@ export class CommentQueryRepository {
             userId: '$userId',
             userLogin: '$userLogin',
           },
-          likesInfo: {
-            likesCount: '0',
-            dislikesCount: '0',
-            myStatus: 'None',
-          },
           postInfo: {
             id: '$post.id',
             title: '$post.title',
@@ -159,7 +154,14 @@ export class CommentQueryRepository {
       page: number,
       pageSize: size,
       totalCount,
-      items: comments,
+      items: comments.map((item) => ({
+        ...item,
+        likesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+        },
+      })),
     };
   }
   // Поиск комментария по его идентификатору
