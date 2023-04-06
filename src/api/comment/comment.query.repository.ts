@@ -139,6 +139,11 @@ export class CommentQueryRepository {
             userId: '$userId',
             userLogin: '$userLogin',
           },
+          likesInfo: {
+            likesCount: 0,
+            dislikesCount: 0,
+            myStatus: 'None',
+          },
           postInfo: {
             id: '$post.id',
             title: '$post.title',
@@ -151,9 +156,9 @@ export class CommentQueryRepository {
 
     return {
       pagesCount,
-      totalCount,
       page: number,
       pageSize: size,
+      totalCount,
       items: comments,
     };
   }
