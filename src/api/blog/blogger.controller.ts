@@ -88,31 +88,16 @@ export class BloggerController {
   async findCommentsByAllPosts(
     @Query()
     { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
-  //): Promise<ResponseViewModelDetail<CommentByPostViewModel>> {
-  ): Promise<any> {
-    /*const commentsByAllPosts =
-        await this.commentQueryRepository.findCommentsByAllPosts({
-          pageNumber,
-          pageSize,
-          sortBy,
-          sortDirection,
-        });*/
+  ): Promise<ResponseViewModelDetail<CommentByPostViewModel>> {
+    const commentsByAllPosts =
+      await this.commentQueryRepository.findCommentsByAllPosts({
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+      });
 
-    return {
-      id: '1',
-      content: '1',
-      createdAt: '1',
-      commentatorInfo: {
-        userId: '$userId',
-        userLogin: '$userLogin',
-      },
-      postInfo: {
-        id: '$post.id',
-        title: '$post.title',
-        blogId: '$post.blogId',
-        blogName: '$post.blogName',
-      },
-    };
+    return commentsByAllPosts;
   }
 
   // Создание блогера
@@ -328,6 +313,4 @@ export class BloggerController {
     }
   }
   // Получение списка комментария по всем постам блогера
-  
- 
 }

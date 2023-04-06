@@ -112,11 +112,11 @@ export class CommentQueryRepository {
   > {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
-    // const totalCount = await this.CommentModel.countDocuments();
-    // const pagesCount = Math.ceil(totalCount / size);
+    const totalCount = await this.CommentModel.countDocuments();
+    const pagesCount = Math.ceil(totalCount / size);
     const skip = (number - 1) * size;
 
-    /*const comments = await this.CommentModel.aggregate([
+    const comments = await this.CommentModel.aggregate([
       { $sort: { [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1 } },
       { $skip: skip },
       { $limit: size },
@@ -147,30 +147,14 @@ export class CommentQueryRepository {
           },
         },
       },
-    ]);*/
+    ]);
 
     return {
-      pagesCount: 1,
-      totalCount: 10,
+      pagesCount,
+      totalCount,
       page: number,
       pageSize: size,
-      items: [
-        {
-          id: '1',
-          content: '1',
-          createdAt: '1',
-          commentatorInfo: {
-            userId: '$userId',
-            userLogin: '$userLogin',
-          },
-          postInfo: {
-            id: '$post.id',
-            title: '$post.title',
-            blogId: '$post.blogId',
-            blogName: '$post.blogName',
-          },
-        },
-      ],
+      items: comments,
     };
   }
   // Поиск комментария по его идентификатору
